@@ -5,8 +5,7 @@ PATH := ${PATH}:${PWD}/vendor/bin
 VERSION := "0.1.DEV"
 BUILDSTAMP :=`date +%FT%T%z`
 
-# GITHASH := `git rev-parse HEAD`
-GITHASH := `-`
+GITHASH := `git rev-parse HEAD`
 
 # GOOS:="linux"
 # GOARCH:="386"
