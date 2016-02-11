@@ -1,0 +1,21 @@
+language: go
+
+go:
+  - 1.5.2
+
+addons:
+  postgresql: "9.4"
+
+services:
+  - postgresql
+
+install: make vendor_get
+
+before_script:
+  - psql -V
+  - psql -c 'create database magickeys;' -U postgres
+  - psql -a -d magickeys -f schema/v1.sql -U postgres
+  - cp config/config.json.travis config/config.json
+
+script:
+  - make test

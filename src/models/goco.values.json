@@ -1,0 +1,114 @@
+{
+	"PkgName": "models",
+	"Imports": ["time", "github.com/golang/glog", "github.com/satori/go.uuid"],
+	"Models": [
+		{
+			"Name": "ValueDTO",
+			"Type": "dto",
+			"Implements": ["DTO"],
+			"Fields": [
+				{
+					"Name": "ValueId",
+					"Type": "string",
+					"Tags": {
+						"json": "-"
+					}
+				},
+				{
+					"Name": "Keys",
+					"Type": "StringArray"	
+				},
+				{
+					"Name": "Value",
+					"Type": "string"	
+				},
+				{
+					"Name": "Props",
+					"Type": "StringMap"
+				},
+				{
+					"Name": "Flags",
+					"Type": "StringArray"
+				},
+				{
+					"Name": "IsEnabled",
+					"Type": "bool"
+				},
+				{
+					"Name": "IsRemoved",
+					"Type": "bool"
+				}
+			]
+		},
+		{
+			"Name": "Value",
+			"Type": "database",
+			"TableName": "values",
+			"FactoryCustomCode": [],
+			"Fields": [
+				{
+					"Name": "ValueId",
+					"Type": "uuid.UUID",
+					"IsPrimaryKey": true
+				},
+				{
+					"Name": "Keys",
+					"Type": "[]string"
+				},
+				{
+					"Name": "Value",
+					"Type": "string"
+				},
+				{
+					"Name": "Props",
+					"Type": "StringMap"
+				},
+				{
+					"Name": "Flags",
+					"Type": "[]string"
+				},
+				{
+					"Name": "IsEnabled",
+					"Type": "bool"
+				},
+				{
+					"Name": "IsRemoved",
+					"Type": "bool"
+				},
+
+				{
+					"Name": "UpdatedAt",
+					"Type": "time.Time",
+					"Tags": {
+						"sql": "type:timestamp;default:now()"
+					}
+				},
+				{
+					"Name": "CreatedAt",
+					"Type": "time.Time",
+					"Tags": {
+						"sql": "type:timestamp;default:null"
+					}
+				}
+			],
+			"Transformer": {
+				"From": [
+					{
+						"Name": "ValueDTO",
+						"Map": {
+							"Keys":"Keys.Array()",
+							"Value":"Value",
+							"Props":"Props",
+							"Flags":"Flags.Array()",
+							"IsEnabled":"IsEnabled",
+							"IsRemoved":"IsRemoved"
+						},
+						"Custom": [
+							"model.ValueId = uuid.FromStringOrNil(dto.ValueId)"
+						]
+					}
+				]
+			}
+		}
+	]
+}
