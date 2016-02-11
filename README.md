@@ -32,7 +32,7 @@ CREATE UNIQUE INDEX values_keys_ifuniq_idx on values (sort_text_array(keys))
 
 # Примеры использования
 
-В качестве фронтенда используется [mithril](mithril.js.org)
+В качестве фронтенда используется [mithril](http://mithril.js.org)
 
 * Просто текстовые поля
 * Списки
