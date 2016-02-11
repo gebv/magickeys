@@ -1,0 +1,40 @@
+{
+	"PkgName": "models",
+	"Imports": ["github.com/golang/glog"],
+	"Models": [
+		{
+			"Name": "Response",
+			"Type": "dto",
+			"FactoryCustomCode": [
+				"model.StatusCode = 400 // http.StatusBadRequest"
+			],
+			"Fields": [
+				{
+					"Name": "StatusCode",
+					"Type": "int"
+				},
+				{
+					"Name": "Message",
+					"Type": "string",
+					"Tags": {
+						"json": "message,omitempty"
+					}
+				},
+				{
+					"Name": "DevMessage",
+					"Type": "string",
+					"Tags": {
+						"json": "dev_message,omitempty"
+					}
+				},
+				{
+					"Name": "Data",
+					"Type": "interface{}",
+					"Tags": {
+						"json": "data,omitempty"
+					}
+				}
+			]
+		}
+	]
+}

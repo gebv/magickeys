@@ -7,13 +7,13 @@ import (
 	"github.com/jackc/pgx"
 )
 
-func FindModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, fields ...string) error {
+func FindModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, where string, fields ...string) error {
 	fieldNames, fieldValues := model.Fields(fields...)
 
 	query := SqlSelect(model.TableName(), fieldNames)
 	
 
-	where := fmt.Sprintf(" WHERE %s = ?", model.PrimaryName())
+	where = fmt.Sprintf(" WHERE %s = ? %s", model.PrimaryName(), where)
 
 	query = FormateToPQuery(query+where)
 	args := []interface{}{model.PrimaryValue()}
@@ -53,10 +53,10 @@ func CreateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, fields ...string)
 	_fields.Add("updated_at")
 	_fields.Add(model.PrimaryName())
 
-	return updateOrCreateModel(model, db, tx, true, false, _fields...)
+	return updateOrCreateModel(model, db, tx, true, false, "", _fields...)
 }
 
-func UpdateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, fields ...string) (err error) {
+func UpdateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, where string, fields ...string) (err error) {
 	if len(model.PrimaryValue()) == 0 {
 		glog.Errorf("Update '%T'. Primary key = nil", model)
 		return models.ErrNotValid
@@ -69,19 +69,19 @@ func UpdateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, fields ...string)
 	_fields.Del("created_at")
 	_fields.Add("updated_at")
 
-	return updateOrCreateModel(model, db, tx, false, false, _fields...)
+	return updateOrCreateModel(model, db, tx, false, false, where, _fields...)
 }
 
-func DeleteModel(model models.Model, db *pgx.Conn, tx *pgx.Tx) (err error) {
+func DeleteModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, where string) (err error) {
 	if len(model.PrimaryValue()) == 0 {
 		glog.Errorf("Delete '%T'. Primary key = nil", model)
 		return models.ErrNotValid
 	}
 
-	return updateOrCreateModel(model, db, tx, false, true, "updated_at", "removed_at", "is_removed")
+	return updateOrCreateModel(model, db, tx, false, true, where, "updated_at", "removed_at", "is_removed")
 }
 
-func updateOrCreateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, isNew, isRemove bool, fields ...string) error {
+func updateOrCreateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, isNew, isRemove bool, where string, fields ...string) error {
 	if isNew {
 		model.BeforeCreate()
 	}
@@ -100,7 +100,7 @@ func updateOrCreateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, isNew, is
 		query = SqlInsert(model.TableName(), fieldNames)
 	}
 
-	where := fmt.Sprintf(" WHERE %[1]s = ? RETURNING %[1]s", model.PrimaryName())
+	where = fmt.Sprintf(" WHERE %[1]s = ? %[2]s RETURNING %[1]s", model.PrimaryName(), where)
 	if isNew {
 		where = fmt.Sprintf(" RETURNING %s", model.PrimaryName())
 	} else {

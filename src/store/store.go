@@ -57,6 +57,10 @@ func (sm *StoreManager) Get(name string) Store {
 	return sm.stores[name]
 }
 
+func (sm *StoreManager) ValueStore() *ValueStore {
+	return sm.stores["value"].(*ValueStore)
+}
+
 func (sm StoreManager) ErrorLog(prefix string, args ...interface{}) {
 	if len(args)%2 == 0 {
 		glog.Errorf(prefix+": "+strings.Repeat("%v='%v', ", len(args)/2), args...)

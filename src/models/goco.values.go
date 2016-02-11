@@ -123,12 +123,12 @@ func (model *Value) TransformFrom(in interface{}) error {
 	switch in.(type) {
 	case *ValueDTO:
 		dto := in.(*ValueDTO)
+		model.IsEnabled = dto.IsEnabled
+		model.IsRemoved = dto.IsRemoved
 		model.Keys = dto.Keys.Array()
 		model.Value = dto.Value
 		model.Props = dto.Props
 		model.Flags = dto.Flags.Array()
-		model.IsEnabled = dto.IsEnabled
-		model.IsRemoved = dto.IsRemoved
 		model.ValueId = uuid.FromStringOrNil(dto.ValueId)
 	default:
 		glog.Errorf("Not supported type %v", in)
