@@ -1,5 +1,7 @@
 # magic keys
 
+[![Build Status](https://travis-ci.org/gebv/magickeys.svg?branch=master)](https://travis-ci.org/gebv/magickeys)
+
 Эксперементальный проект.
 Основная идея - в качестве ключа (в таблице где хранятся данные) используется массив ключей. Для хранения данных используется РСУБД Postgres. 
 
