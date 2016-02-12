@@ -14,6 +14,14 @@
 						"json": "-"
 					}
 				},
+				{	
+					"Comment": "Какие поля следует",
+					"Name": "UpdateFields",
+					"Type": "StringArray",
+					"Tags": {
+						"json": "-"
+					}
+				},
 				{
 					"Name": "Keys",
 					"Type": "StringArray"	
@@ -44,7 +52,9 @@
 			"Name": "Value",
 			"Type": "database",
 			"TableName": "values",
-			"FactoryCustomCode": [],
+			"FactoryCustomCode": [
+				"model.Props = make(map[string]string)"
+			],
 			"Fields": [
 				{
 					"Name": "ValueId",
@@ -61,7 +71,7 @@
 				},
 				{
 					"Name": "Props",
-					"Type": "StringMap"
+					"Type": "map[string]string"
 				},
 				{
 					"Name": "Flags",
@@ -94,16 +104,35 @@
 			"Transformer": {
 				"From": [
 					{
+						"Name": "Value",
+						"Map": {
+							"ValueId":"ValueId",
+							"Keys":"Keys",
+							"Value":"Value",
+							"Flags":"Flags",
+							"IsEnabled":"IsEnabled",
+							"IsRemoved":"IsRemoved",
+							"UpdatedAt":"UpdatedAt",
+							"CreatedAt":"CreatedAt"
+						},
+						"Custom": [
+							"model.Props = make(map[string]string, len(dto.Props))",
+							"for key, _ := range dto.Props {",
+							"model.Props[key] = dto.Props[key]",
+							"}"
+						]
+					},
+					{
 						"Name": "ValueDTO",
 						"Map": {
 							"Keys":"Keys.Array()",
 							"Value":"Value",
-							"Props":"Props",
 							"Flags":"Flags.Array()",
 							"IsEnabled":"IsEnabled",
 							"IsRemoved":"IsRemoved"
 						},
 						"Custom": [
+							"model.Props = map[string]string(dto.Props)",
 							"model.ValueId = uuid.FromStringOrNil(dto.ValueId)"
 						]
 					}

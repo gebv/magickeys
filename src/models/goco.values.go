@@ -17,6 +17,8 @@ type ValueDTO struct {
 	DTO
 	// ValueId
 	ValueId string `json:"-" `
+	// UpdateFields	Какие поля следует
+	UpdateFields StringArray `json:"-" `
 	// Keys
 	Keys StringArray `json:"keys" `
 	// Value
@@ -58,6 +60,8 @@ func (v *ValueDTO) Maps() map[string]interface{} {
 	return map[string]interface{}{
 		// ValueId
 		"value_id": &v.ValueId,
+		// UpdateFields	Какие поля следует
+		"update_fields": &v.UpdateFields,
 		// Keys
 		"keys": &v.Keys,
 		// Value
@@ -86,6 +90,8 @@ func (v *ValueDTO) FromJson(data interface{}) error {
 // Value
 func NewValue() *Value {
 	model := new(Value)
+	// Custom factory code
+	model.Props = make(map[string]string)
 	return model
 }
 
@@ -97,7 +103,7 @@ type Value struct {
 	// Value
 	Value string `json:"value" `
 	// Props
-	Props StringMap `json:"props" `
+	Props map[string]string `json:"props" `
 	// Flags
 	Flags []string `json:"flags" `
 	// IsEnabled
@@ -121,14 +127,28 @@ func (model Value) TransformTo(out interface{}) error {
 
 func (model *Value) TransformFrom(in interface{}) error {
 	switch in.(type) {
+	case *Value:
+		dto := in.(*Value)
+		model.Value = dto.Value
+		model.Flags = dto.Flags
+		model.IsEnabled = dto.IsEnabled
+		model.IsRemoved = dto.IsRemoved
+		model.UpdatedAt = dto.UpdatedAt
+		model.CreatedAt = dto.CreatedAt
+		model.ValueId = dto.ValueId
+		model.Keys = dto.Keys
+		model.Props = make(map[string]string)
+		for key, _ := range dto.Props {
+			model.Props[key] = dto.Props[key]
+		}
 	case *ValueDTO:
 		dto := in.(*ValueDTO)
-		model.IsEnabled = dto.IsEnabled
 		model.IsRemoved = dto.IsRemoved
 		model.Keys = dto.Keys.Array()
 		model.Value = dto.Value
-		model.Props = dto.Props
 		model.Flags = dto.Flags.Array()
+		model.IsEnabled = dto.IsEnabled
+		model.Props = map[string]string(dto.Props)
 		model.ValueId = uuid.FromStringOrNil(dto.ValueId)
 	default:
 		glog.Errorf("Not supported type %v", in)

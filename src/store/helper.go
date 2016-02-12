@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx"
 )
 
-func FindModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, where string, fields ...string) error {
+func FindModel(model models.Model, db *pgx.ConnPool, tx *pgx.Tx, where string, fields ...string) error {
 	fieldNames, fieldValues := model.Fields(fields...)
 
 	query := SqlSelect(model.TableName(), fieldNames)
@@ -40,7 +40,7 @@ func FindModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, where string, field
 }
 
 
-func CreateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, fields ...string) (err error) {
+func CreateModel(model models.Model, db *pgx.ConnPool, tx *pgx.Tx, fields ...string) (err error) {
 	if len(model.PrimaryValue()) == 0 {
 		glog.Errorf("Create '%T'. Primary key = nil", model)
 		return models.ErrNotValid
@@ -56,7 +56,7 @@ func CreateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, fields ...string)
 	return updateOrCreateModel(model, db, tx, true, false, "", _fields...)
 }
 
-func UpdateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, where string, fields ...string) (err error) {
+func UpdateModel(model models.Model, db *pgx.ConnPool, tx *pgx.Tx, where string, fields ...string) (err error) {
 	if len(model.PrimaryValue()) == 0 {
 		glog.Errorf("Update '%T'. Primary key = nil", model)
 		return models.ErrNotValid
@@ -72,7 +72,7 @@ func UpdateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, where string, fie
 	return updateOrCreateModel(model, db, tx, false, false, where, _fields...)
 }
 
-func DeleteModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, where string) (err error) {
+func DeleteModel(model models.Model, db *pgx.ConnPool, tx *pgx.Tx, where string) (err error) {
 	if len(model.PrimaryValue()) == 0 {
 		glog.Errorf("Delete '%T'. Primary key = nil", model)
 		return models.ErrNotValid
@@ -81,7 +81,7 @@ func DeleteModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, where string) (er
 	return updateOrCreateModel(model, db, tx, false, true, where, "updated_at", "removed_at", "is_removed")
 }
 
-func updateOrCreateModel(model models.Model, db *pgx.Conn, tx *pgx.Tx, isNew, isRemove bool, where string, fields ...string) error {
+func updateOrCreateModel(model models.Model, db *pgx.ConnPool, tx *pgx.Tx, isNew, isRemove bool, where string, fields ...string) error {
 	if isNew {
 		model.BeforeCreate()
 	}

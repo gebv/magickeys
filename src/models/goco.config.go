@@ -17,6 +17,8 @@ type Config struct {
 	ServiceSettings ServiceSettings `json:"ServiceSettings" `
 	// StorageSettings
 	StorageSettings StorageSettings `json:"StorageSettings" `
+	// WebSettings
+	WebSettings WebSettings `json:"WebSettings" `
 }
 
 func (model Config) TransformTo(out interface{}) error {
@@ -48,6 +50,8 @@ func (c *Config) Maps() map[string]interface{} {
 		"service_settings": &c.ServiceSettings,
 		// StorageSettings
 		"storage_settings": &c.StorageSettings,
+		// WebSettings
+		"web_settings": &c.WebSettings,
 	}
 }
 
@@ -118,6 +122,57 @@ func (s *ServiceSettings) Fields(fields ...string) ([]string, []interface{}) {
 // FromJson data as []byte or io.Reader
 func (s *ServiceSettings) FromJson(data interface{}) error {
 	return FromJson(s, data)
+}
+
+// WebSettings
+func NewWebSettings() *WebSettings {
+	model := new(WebSettings)
+	return model
+}
+
+type WebSettings struct {
+	// ExamplesPath
+	ExamplesPath string `json:"ExamplesPath" `
+}
+
+func (model WebSettings) TransformTo(out interface{}) error {
+	switch out.(type) {
+	default:
+		glog.Errorf("Not supported type %v", out)
+		return ErrNotSupported
+	}
+	return nil
+}
+
+func (model *WebSettings) TransformFrom(in interface{}) error {
+	switch in.(type) {
+	default:
+		glog.Errorf("Not supported type %v", in)
+		return ErrNotSupported
+	}
+	return nil
+
+}
+
+//
+// Helpful functions
+//
+
+func (w *WebSettings) Maps() map[string]interface{} {
+	return map[string]interface{}{
+		// ExamplesPath
+		"examples_path": &w.ExamplesPath,
+	}
+}
+
+// Fields extract of fields from map
+func (w *WebSettings) Fields(fields ...string) ([]string, []interface{}) {
+	return ExtractFieldsFromMap(w.Maps(), fields...)
+}
+
+// FromJson data as []byte or io.Reader
+func (w *WebSettings) FromJson(data interface{}) error {
+	return FromJson(w, data)
 }
 
 // StorageSettings

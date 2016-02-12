@@ -19,6 +19,13 @@
 					"Tags": {
 						"json": "StorageSettings"
 					}
+				},
+				{
+					"Name": "WebSettings",
+					"Type": "WebSettings",
+					"Tags": {
+						"json": "WebSettings"
+					}
 				}
 			]
 		},
@@ -45,6 +52,19 @@
 					"Type": "time.Duration",
 					"Tags": {
 						"json": "TimeoutRequest"
+					}
+				}
+			]
+		},
+		{
+			"Name": "WebSettings",
+			"Type": "dto",
+			"Fields": [
+				{
+					"Name": "ExamplesPath",
+					"Type": "string",
+					"Tags": {
+						"json": "ExamplesPath"
 					}
 				}
 			]

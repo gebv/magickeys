@@ -6,6 +6,8 @@ import (
 	"net/http"
 	// "github.com/golang/glog"
 	"strings"
+	"time"
+	"utils"
 )
 
 
@@ -23,7 +25,10 @@ func InitValues(r *mux.Router) {
 }
 
 func BuildSearchByMode(mode string) func(http.ResponseWriter, *http.Request) {
+
 	return func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(time.Millisecond * utils.Cfg.ServiceSettings.TimeoutRequest)
+
 		w.Header().Set("Content-Type", "application/json")
 
 		dto := models.NewValueDTO()
@@ -47,6 +52,7 @@ func BuildSearchByMode(mode string) func(http.ResponseWriter, *http.Request) {
 } 
 
 func NewValueHandler(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(time.Millisecond * utils.Cfg.ServiceSettings.TimeoutRequest)
 	w.Header().Set("Content-Type", "application/json")
 	
 	dto := models.NewValueDTO()
@@ -74,6 +80,7 @@ func NewValueHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetValueHandler(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(time.Millisecond * utils.Cfg.ServiceSettings.TimeoutRequest)
 	w.Header().Set("Content-Type", "application/json")
 	
 	dto := models.NewValueDTO()
@@ -96,10 +103,13 @@ func GetValueHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateValueHandler(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(time.Millisecond * utils.Cfg.ServiceSettings.TimeoutRequest)
 	w.Header().Set("Content-Type", "application/json")
 	
 	dto := models.NewValueDTO()
 	dto.ValueId = mux.Vars(r)["value_id"]
+	dto.UpdateFields = strings.Split(r.URL.Query().Get("fields"), ",")
+
 	res := models.NewResponse()
 
 	if err := dto.FromJson(r.Body); err != nil {

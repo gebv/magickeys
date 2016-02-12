@@ -10,7 +10,7 @@ import (
 
 	"os"
 	"os/signal"
-	// _ "store"
+	"web"
 	"syscall"
 )
 
@@ -25,6 +25,7 @@ func main() {
 
 	api.NewServer()
 	api.InitApi()
+	web.InitWeb()
 	api.StartServer()
 
 	c := make(chan os.Signal)

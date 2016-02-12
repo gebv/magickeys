@@ -1,0 +1,213 @@
+<meta charset="utf-8">
+<title>Пример простого списка</title>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/uikit/2.24.3/css/uikit.almost-flat.css">
+<body class="uk-grid">
+	<div class="uk-container-center uk-width-9-10" id="app">
+		
+	</div>
+</body>
+<script src="//cdnjs.cloudflare.com/ajax/libs/mithril/0.2.1/mithril.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js"></script>
+<script>
+	var api = "/api/v1/values/search/eq"
+	var findURL = function(mode, keys) {
+		return "/api/v1/values/search/"+encodeURIComponent(mode)+"/"+encodeURIComponent(keys.join(","));
+	};
+
+	var modelURL = function(value_id, fields) {
+		return "/api/v1/values/"+encodeURIComponent(value_id)+"?"+m.route.buildQueryString({fields: fields});
+	}
+
+	var keysToString = function(keys) {
+		return _.sortBy(keys).join(":")
+	}
+
+	var NewItem = function(){
+		return {
+			value_id: "",
+			value: "",
+			keys: [],
+			props: {
+				done: "no"
+			},
+			flags: [],
+			is_enabled: true,
+			is_removed: false
+		}
+	}
+
+	var updateModel = function(value_id, data, fields) {
+		return m.request({url: modelURL(value_id, fields), "method": "PUT", data: data})
+	}
+
+	var app = {
+		items: m.prop([]),
+		isLoadedByKeys: m.prop({}),
+
+		userCreatedNewItem: function(value, keys) {
+			var newItem = this._addNewItem({keys: keys, value: value, props: {ts: "ts"+_.now().toString()}});
+
+			m.endComputation();
+
+			m.request({url: "/api/v1/values/", "method": "POST", data: newItem})
+				.then(function(res){
+					if (res.status_code == 200) {
+						newItem(res.data);
+					}
+
+				}.bind(this)); 	
+
+			return
+		},
+
+		_addNewItem: function(item) {
+			var _item = m.prop(_.merge({}, NewItem(), item));
+			console.log(item.props);
+			this.items().push(_item);
+
+			return _item;
+		},
+
+		init: function(keys) {
+			// Загрузка всех позиций в которых ключи пересекаются с keys
+			m.request({url: findURL("contains", keys)})
+				.then(function(res){
+					if (res.status_code == 200 && res.data) {
+						console.log(res.data);
+						_.each(res.data, function(item){this._addNewItem(item)}.bind(this));
+					}
+				}.bind(this));
+		},
+
+		// Выборка всех позиций с точным совпадением ключей
+		getItemsByKeys: function(keys) {
+			return _(this.items())
+				.filter(function(item){
+					return keysToString(item().keys) == keysToString(keys);
+				})
+				.orderBy(function(item){return item().props.ts}, "desc")
+				.value();
+		}
+	}
+
+	var Item = {
+		controller: function(c) {
+			var api = {
+				_isloading: m.prop(c._isloading || false),
+				onChangeStatus: function(value_id) {
+					return function(done) {
+						m.redraw.strategy('diff');
+						c.item().props["done"] = done? "yes": "no";
+						m.redraw.strategy('diff');
+						this._isloading(true);
+
+
+						m.endComputation();
+
+						updateModel(value_id, c.item(), "props").then(function(res){
+							this._isloading(false);
+							m.redraw.strategy('diff');
+						}.bind(this));
+					}.bind(this);
+				}
+			};
+
+			api = _.assign({}, api, c);
+
+			return api;
+		},
+		view: function(c) {
+			var spinner = c._isloading() || c.item().value_id.length == 0? m("i.uk-position-absolute uk-icon-spinner uk-icon-spin", {style: {left: "-1em"}}): m("span");
+
+			var isChecked = c.item().props.hasOwnProperty("done") && c.item().props["done"] == "yes";
+			var checkbok = m("input[type='checkbox'].uk-margin-right", {
+						onchange: m.withAttr("checked", c.onChangeStatus(c.item().value_id)), 
+						checked: isChecked? "checked": ""});
+
+			var key = c.item().props.ts+":"+c.item().value_id;
+
+			return m("li.uk-position-relative", {key: key}, [
+				spinner,
+				checkbok,
+				m("span", c.item().value),
+				c.item().value_id.length > 0 ?
+					m.component(Layout, {placeholder: "Новая позиция в '"+c.item().value+"'", keys: _.concat(c.keys, c.item().value_id)}):
+					m("span")
+				]);
+		}
+	}
+
+	var Items = {
+		controller: function(c) {
+			var api = {};
+			api = _.assign({}, api, c);
+
+			return api;
+		},
+		view: function(c) {
+			var list = _.map(app.getItemsByKeys(c.keys), function(item){
+				
+				return m.component(Item, {item: item, keys: c.keys});
+			});
+			return m("ul.uk-list", list);
+		}
+	}
+
+	var ManagerItems = {
+		controller: function(c) {
+			var api = {
+				_value: m.prop(""),
+				onCreateItem: function() {
+					return function(e) {
+						e.preventDefault();
+
+						if (this._value().trim().length == 0 ) {
+							return false
+						}
+
+						app.userCreatedNewItem(this._value(), c.keys);
+						this._value("");
+
+						return false;
+					}.bind(this);
+				},
+				onChangeValueItem: function() {
+					return function(value) {
+						this._value(value);
+						m.redraw.strategy("none");
+					}.bind(this);
+				}
+			};
+			api = _.assign({}, api, c);
+
+			return api;
+		},
+		view: function(c) {
+			var form = m("form.uk-form", {onsubmit: c.onCreateItem()}, [
+				m("input[type='text'].uk-width-1-1", {
+					placeholder: c.placeholder, 
+					// config: function(e){e.focus()}, 
+					oninput: m.withAttr("value", c.onChangeValueItem()), value: c._value()
+					}),
+				]);
+
+			return m("div", form);
+		}
+	}
+
+	app.init(["examples", "simplelist"]);
+
+	var Layout = {
+		controller: function(c) {
+			return c;
+		},
+		view: function(c) {
+			return m("div", [
+				m.component(ManagerItems, {key: c.keys.join(":")+":managerItems", keys: c.keys, placeholder:c.placeholder}),
+				m.component(Items, {key: c.keys.join(":")+":items", keys: c.keys, placeholder:c.placeholder})
+				]);
+		}
+	}
+
+	m.mount(document.getElementById("app"), m.component(Layout, {key: "root", placeholder: "Имя новой позиции", "keys": ["examples", "simplelist"]}));
+</script>

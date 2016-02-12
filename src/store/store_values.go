@@ -4,6 +4,7 @@ import (
 	"models"
 	"github.com/satori/go.uuid"
 	"github.com/jackc/pgx"
+	// "github.com/golang/glog"
 	"fmt"
 )
 
@@ -30,7 +31,7 @@ func (_manager ValueStore) Name() string {
 	return "value"
 }
 
-func (s *ValueStore) FindByKeys(dto *models.ValueDTO, mode string) (res []*models.Value, err error) {
+func (s *ValueStore) FindByKeys(dto *models.ValueDTO, mode string) (res []models.Value, err error) {
 	if err := models.V.StructPartial(dto, "Keys"); err != nil {
 		return nil, err
 	}
@@ -75,10 +76,16 @@ func (s *ValueStore) FindByKeys(dto *models.ValueDTO, mode string) (res []*model
 			return
 		}
 
-		res = append(res, model)
+		// res = append(res, *model)
+		_model := models.NewValue()
+		_model.TransformFrom(model)
+		res = append(res, *_model)
+
+		// TODO: reset for maps
+		model.Props = models.StringMap{}
 	}
 
-	return 
+	return res, nil
 }
 
 func (s *ValueStore) Create(dto *models.ValueDTO) (models.Model, error) {
@@ -122,7 +129,7 @@ func (s *ValueStore) Update(dto *models.ValueDTO) (models.Model, error) {
 	model := models.NewValue()
 	model.TransformFrom(dto)
 
-	if err := UpdateModel(model, s.db, dto.Tx, " AND is_removed = false", "value", "props", "flags", "update_at", "is_enabled"); err != nil {
+	if err := UpdateModel(model, s.db, dto.Tx, " AND is_removed = false", dto.UpdateFields...); err != nil {
 		return nil, err
 	}
 	

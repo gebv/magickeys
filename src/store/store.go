@@ -13,7 +13,7 @@ import (
 )
 
 // var db *sql.DB
-var db *pgx.Conn
+// var db *pgx.Conn
 
 var registredStores = make(map[string]StoreBuilder)
 
@@ -27,11 +27,15 @@ func NewStore() *StoreManager {
 	_sm := &StoreManager{}
 	var err error
 
-	_sm.db, err = setupConnectionPGX(utils.Cfg.StorageSettings)
+	// _sm.db, err = setupConnectionPGX(utils.Cfg.StorageSettings)
+	// if err != nil {
+	// 	panic("error setup connection, err="+err.Error())
+	// }
+
+	_sm.db, err = setupPoolConnectionPGX(utils.Cfg.StorageSettings)
 	if err != nil {
 		panic("error setup connection, err="+err.Error())
 	}
-	db = _sm.db
 
 	_sm.stores = make(map[string]Store)
 
@@ -47,7 +51,8 @@ type Store interface {
 }
 
 type StoreManager struct {
-	db   *pgx.Conn
+	// db   *pgx.Conn
+	db *pgx.ConnPool
 
 	stores map[string]Store
 }
@@ -71,10 +76,16 @@ func (sm StoreManager) ErrorLog(prefix string, args ...interface{}) {
 }
 
 func setupConnectionPGX(c models.StorageSettings) (*pgx.Conn, error) {
-	// config := pgx.ConnPoolConfig{ConnConfig: extractPGXStorageConfig(c), MaxConnections: 20}
-	// pool, err := pgx.NewConnPool(config)
+
 	return pgx.Connect(extractPGXStorageConfig(c))
 }
+
+func setupPoolConnectionPGX(c models.StorageSettings) (*pgx.ConnPool, error) {
+	config := pgx.ConnPoolConfig{ConnConfig: extractPGXStorageConfig(c), MaxConnections: 20}
+
+	return pgx.NewConnPool(config)
+}
+
 
 type databaseLogger struct {}
 
