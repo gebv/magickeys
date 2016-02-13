@@ -105,75 +105,85 @@ todo list __web/examples/list.html__
 ```
 magickeys=# SELECT * FROM values WHERE keys @> '{examples,simplelist}';
 -[ RECORD 1 ]-----------------------------------------------------------------------------------------------
-value_id   | 56b7bb0d-d21e-11e5-bd0f-10ddb19b9d24
+value_id   | f39a2780-d240-11e5-b383-10ddb19b9d24
 keys       | {examples,simplelist}
 value      | 1
-props      | {"ts": 1455346345016}
+props      | {"ts": 1455361211108}
 flags      | {}
 is_enabled | t
 is_removed | f
-created_at | 2016-02-13 06:52:25.040155
-updated_at | 2016-02-13 06:52:25.040155
+created_at | 2016-02-13 11:00:11.137421
+updated_at | 2016-02-13 11:00:11.137421
 -[ RECORD 2 ]-----------------------------------------------------------------------------------------------
-value_id   | 56ff4da5-d21e-11e5-bd0f-10ddb19b9d24
-keys       | {examples,simplelist}
-value      | 2
-props      | {"ts": 1455346345488}
-flags      | {}
-is_enabled | t
-is_removed | f
-created_at | 2016-02-13 06:52:25.509213
-updated_at | 2016-02-13 06:52:25.509213
--[ RECORD 3 ]-----------------------------------------------------------------------------------------------
-value_id   | 574803bf-d21e-11e5-bd0f-10ddb19b9d24
+value_id   | f410ef5e-d240-11e5-b383-10ddb19b9d24
 keys       | {examples,simplelist}
 value      | 3
-props      | {"ts": 1455346345962}
+props      | {"ts": 1455361211884}
 flags      | {}
 is_enabled | t
 is_removed | f
-created_at | 2016-02-13 06:52:25.985734
-updated_at | 2016-02-13 06:52:25.985734
+created_at | 2016-02-13 11:00:11.915862
+updated_at | 2016-02-13 11:00:11.915862
+-[ RECORD 3 ]-----------------------------------------------------------------------------------------------
+value_id   | f53cf13c-d240-11e5-b383-10ddb19b9d24
+keys       | {examples,f3d26df6-d240-11e5-b383-10ddb19b9d24,simplelist}
+value      | 2ю1
+props      | {"ts": 1455361213853}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 11:00:13.88199
+updated_at | 2016-02-13 11:00:13.88199
 -[ RECORD 4 ]-----------------------------------------------------------------------------------------------
-value_id   | 599a1126-d21e-11e5-bd0f-10ddb19b9d24
-keys       | {574803bf-d21e-11e5-bd0f-10ddb19b9d24,examples,simplelist}
-value      | 3.2
-props      | {"ts": 1455346349853}
+value_id   | f604a77f-d240-11e5-b383-10ddb19b9d24
+keys       | {examples,f3d26df6-d240-11e5-b383-10ddb19b9d24,simplelist}
+value      | 2.2
+props      | {"ts": 1455361215158}
 flags      | {}
 is_enabled | t
 is_removed | f
-created_at | 2016-02-13 06:52:29.878916
-updated_at | 2016-02-13 06:52:29.878916
+created_at | 2016-02-13 11:00:15.190822
+updated_at | 2016-02-13 11:00:15.190822
 -[ RECORD 5 ]-----------------------------------------------------------------------------------------------
-value_id   | 5cbdd524-d21e-11e5-bd0f-10ddb19b9d24
-keys       | {574803bf-d21e-11e5-bd0f-10ddb19b9d24,599a1126-d21e-11e5-bd0f-10ddb19b9d24,examples,simplelist}
-value      | 3.2.2
-props      | {"ts": 1455346355118}
-flags      | {}
-is_enabled | t
-is_removed | f
-created_at | 2016-02-13 06:52:35.146474
-updated_at | 2016-02-13 06:52:35.146474
--[ RECORD 6 ]-----------------------------------------------------------------------------------------------
-value_id   | 5b0af8eb-d21e-11e5-bd0f-10ddb19b9d24
-keys       | {574803bf-d21e-11e5-bd0f-10ddb19b9d24,599a1126-d21e-11e5-bd0f-10ddb19b9d24,examples,simplelist}
-value      | 3.2.1
-props      | {"ts": 1455346352272, "done": "yes"}
-flags      | {}
-is_enabled | t
-is_removed | f
-created_at | 2016-02-13 06:52:32.296574
-updated_at | 2016-02-13 06:52:36.459413
--[ RECORD 7 ]-----------------------------------------------------------------------------------------------
-value_id   | 58e5f5c6-d21e-11e5-bd0f-10ddb19b9d24
-keys       | {574803bf-d21e-11e5-bd0f-10ddb19b9d24,examples,simplelist}
+value_id   | f7623aed-d240-11e5-b383-10ddb19b9d24
+keys       | {examples,f410ef5e-d240-11e5-b383-10ddb19b9d24,simplelist}
 value      | 3.1
-props      | {"ts": 1455346348672, "done": "yes"}
+props      | {"ts": 1455361217452}
 flags      | {}
 is_enabled | t
 is_removed | f
-created_at | 2016-02-13 06:52:28.698567
-updated_at | 2016-02-13 06:52:37.144432
+created_at | 2016-02-13 11:00:17.481803
+updated_at | 2016-02-13 11:00:17.481803
+-[ RECORD 6 ]-----------------------------------------------------------------------------------------------
+value_id   | f80ff014-d240-11e5-b383-10ddb19b9d24
+keys       | {examples,f410ef5e-d240-11e5-b383-10ddb19b9d24,simplelist}
+value      | 3.2
+props      | {"ts": 1455361218588}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 11:00:18.620213
+updated_at | 2016-02-13 11:00:18.620213
+-[ RECORD 7 ]-----------------------------------------------------------------------------------------------
+value_id   | f9f55546-d240-11e5-b383-10ddb19b9d24
+keys       | {examples,f410ef5e-d240-11e5-b383-10ddb19b9d24,f80ff014-d240-11e5-b383-10ddb19b9d24,simplelist}
+value      | 3.2.1
+props      | {"ts": 1455361221772, "done": "yes"}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 11:00:21.8013
+updated_at | 2016-02-13 11:00:23.378962
+-[ RECORD 8 ]-----------------------------------------------------------------------------------------------
+value_id   | f3d26df6-d240-11e5-b383-10ddb19b9d24
+keys       | {examples,simplelist}
+value      | 2
+props      | {"ts": 1455361211478, "done": "yes"}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 11:00:11.506226
+updated_at | 2016-02-13 11:00:24.35061
 
 magickeys=#
 ```
