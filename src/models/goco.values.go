@@ -10,6 +10,8 @@ import (
 // ValueDTO
 func NewValueDTO() *ValueDTO {
 	model := new(ValueDTO)
+	// Custom factory code
+	model.Props = NewInterfaceMap()
 	return model
 }
 
@@ -24,7 +26,7 @@ type ValueDTO struct {
 	// Value
 	Value string `json:"value" `
 	// Props
-	Props StringMap `json:"props" `
+	Props InterfaceMap `json:"props" `
 	// Flags
 	Flags StringArray `json:"flags" `
 	// IsEnabled
@@ -91,7 +93,7 @@ func (v *ValueDTO) FromJson(data interface{}) error {
 func NewValue() *Value {
 	model := new(Value)
 	// Custom factory code
-	model.Props = make(map[string]string)
+	model.Props = NewInterfaceMap()
 	return model
 }
 
@@ -103,7 +105,7 @@ type Value struct {
 	// Value
 	Value string `json:"value" `
 	// Props
-	Props map[string]string `json:"props" `
+	Props InterfaceMap `json:"props" `
 	// Flags
 	Flags []string `json:"flags" `
 	// IsEnabled
@@ -129,26 +131,28 @@ func (model *Value) TransformFrom(in interface{}) error {
 	switch in.(type) {
 	case *Value:
 		dto := in.(*Value)
+		model.Keys = dto.Keys
 		model.Value = dto.Value
-		model.Flags = dto.Flags
+		model.UpdatedAt = dto.UpdatedAt
+		model.Props = dto.Props
+		model.ValueId = dto.ValueId
 		model.IsEnabled = dto.IsEnabled
 		model.IsRemoved = dto.IsRemoved
-		model.UpdatedAt = dto.UpdatedAt
 		model.CreatedAt = dto.CreatedAt
-		model.ValueId = dto.ValueId
-		model.Keys = dto.Keys
-		model.Props = make(map[string]string)
-		for key, _ := range dto.Props {
-			model.Props[key] = dto.Props[key]
-		}
+		model.Flags = dto.Flags
+	//model.Props = make(map[string]string, len(dto.Props))
+	//for key, _ := range dto.Props {
+	//model.Props[key] = dto.Props[key]
+	//}
 	case *ValueDTO:
 		dto := in.(*ValueDTO)
+		model.IsEnabled = dto.IsEnabled
 		model.IsRemoved = dto.IsRemoved
 		model.Keys = dto.Keys.Array()
 		model.Value = dto.Value
 		model.Flags = dto.Flags.Array()
-		model.IsEnabled = dto.IsEnabled
-		model.Props = map[string]string(dto.Props)
+		//model.Props = map[string]string(dto.Props)
+		model.Props = dto.Props
 		model.ValueId = uuid.FromStringOrNil(dto.ValueId)
 	default:
 		glog.Errorf("Not supported type %v", in)

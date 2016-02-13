@@ -87,7 +87,7 @@ func (s *ValueStore) FindByKeys(dto *models.ValueDTO, mode string) (res []models
 		res = append(res, *_model)
 
 		// TODO: reset for maps
-		model.Props = models.StringMap{}
+		model.Props = models.InterfaceMap{}
 	}
 
 	return res, nil

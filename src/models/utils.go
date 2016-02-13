@@ -12,6 +12,29 @@ import (
     "github.com/golang/glog"
 )
 
+func NewInterfaceMap() map[string]interface{} {
+	return make(map[string]interface{})
+}
+
+type InterfaceMap map[string]interface{}
+
+
+func (m *InterfaceMap) Scan(value interface{}) error {
+    return json.Unmarshal(value.([]byte), m)
+}
+
+func (m InterfaceMap) Value() (driver.Value, error) {
+	if len(m) == 0 {
+		return string("{}"), nil
+	}
+	
+    b, err := json.Marshal(m)
+    if err != nil {
+        return string("{}"), err
+    }
+    return string(b), nil
+}
+
 type StringMap map[string]string
 
 func NewStringMap() map[string]string {
