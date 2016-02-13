@@ -16,14 +16,78 @@
 
 Подмножество содержит в себе только один элемент если один из его ключей равен **uniq**. Уникальность определена по всем ключам элемента одновременно. И эта уникальность сохраняется в рамках текущих ключей.
 
+# Установка и запуск
+
+``` shell
+git clone https://github.com/gebv/magickeys.git
+
+cd magickeys
+
+make vendor_get
+
+cp config/config.json.example config/config.json
+// Обновить config/config.json в соответствии с вашими предпочтениями
+// ServiceSettings.ListenAddress - инетрфейс и порт для REST API
+// StorageSettings.User - пользователь БД
+// StorageSettings.Database - базаданных БД
+
+make run
+
+//
+
+make build
+./bin/app.bin -stderrthreshold=INFO -v=2 -config=../config/config.json
+
+// 
+$ tree -L 2
+.
+├── Makefile
+├── README.md
+├── bin
+│   └── app.bin
+├── config
+│   ├── config.json
+│   ├── config.json.example
+│   └── config.json.travis
+├── images
+│   └── magickey_todolist.gif
+├── pkg
+│   └── darwin_amd64
+├── schema
+│   └── v1.sql
+├── src
+│   ├── api
+│   ├── main.go
+│   ├── models
+│   ├── store
+│   ├── utils
+│   └── web
+├── vendor
+│   ├── bin
+│   ├── pkg
+│   └── src
+└── web
+    └── examples
+```
+
+* об **-stderrthreshold** и **-v** смотри [golang/glog pkg](https://github.com/golang/glog)
+* **-config** путь к настройкам приложения
+
+
 ## api
 
 | URL | Описание |
 | ---| --- |
 | /api/v1/values/ | CRUD |
+| [post] /api/v1/values/?fields=field1,fields2 | Создание элемента |
+| [put] /api/v1/values/{value_id}?fields=field1,fields2 | Обновление элемента |
+| [get] /api/v1/values/{value_id} | Загрузка элемента |
+| [delete] /api/v1/values/{value_id} | Удаление элемента |
 | /api/v1/values/search/eq/{keys} | Поиск записей по точному совпадению ключей |
 | /api/v1/values/search/any/{keys} | Поиск всех записей в которых встрачется хотя бы один ключ из keys |
 | /api/v1/values/search/contains/{keys} | Поиск всех записей в которых keys содержатся у ключей элемента |
+
+* Параметр fields отражает те поля, которые будут задействованы в ходе операции
 
 # Примеры использования
 

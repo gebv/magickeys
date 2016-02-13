@@ -1,0 +1,18 @@
+{
+	"ServiceSettings": {
+		"ListenAddress": "127.0.0.1:65010",
+		"Mode": "dev",
+		"TimeoutRequest": 200
+	},
+	"StorageSettings": {
+		"Network": "",
+		"Host": "127.0.0.1",
+		"Port": "",
+		"User": "postgres",
+		"Password": "",
+		"Database": "magickeys"
+	},
+	"WebSettings": {
+		"ExamplesPath": "web/examples"
+	}
+}

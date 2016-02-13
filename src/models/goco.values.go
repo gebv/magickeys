@@ -131,26 +131,26 @@ func (model *Value) TransformFrom(in interface{}) error {
 	switch in.(type) {
 	case *Value:
 		dto := in.(*Value)
-		model.Keys = dto.Keys
-		model.Value = dto.Value
-		model.UpdatedAt = dto.UpdatedAt
 		model.Props = dto.Props
-		model.ValueId = dto.ValueId
+		model.Value = dto.Value
+		model.Flags = dto.Flags
 		model.IsEnabled = dto.IsEnabled
 		model.IsRemoved = dto.IsRemoved
+		model.UpdatedAt = dto.UpdatedAt
+		model.ValueId = dto.ValueId
+		model.Keys = dto.Keys
 		model.CreatedAt = dto.CreatedAt
-		model.Flags = dto.Flags
 	//model.Props = make(map[string]string, len(dto.Props))
 	//for key, _ := range dto.Props {
 	//model.Props[key] = dto.Props[key]
 	//}
 	case *ValueDTO:
 		dto := in.(*ValueDTO)
-		model.IsEnabled = dto.IsEnabled
-		model.IsRemoved = dto.IsRemoved
 		model.Keys = dto.Keys.Array()
 		model.Value = dto.Value
 		model.Flags = dto.Flags.Array()
+		model.IsEnabled = dto.IsEnabled
+		model.IsRemoved = dto.IsRemoved
 		//model.Props = map[string]string(dto.Props)
 		model.Props = dto.Props
 		model.ValueId = uuid.FromStringOrNil(dto.ValueId)
