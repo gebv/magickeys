@@ -3,7 +3,18 @@
 [![Build Status](https://travis-ci.org/gebv/magickeys.svg?branch=master)](https://travis-ci.org/gebv/magickeys)
 
 Эксперементальный проект.
-Основная идея - в качестве ключа (в таблице где хранятся данные) используется массив ключей. Для хранения данных используется РСУБД Postgres. 
+Основная идея - в качестве ключа (в таблице где хранятся данные) используется массив ключей. Keys value.
+
+Ключаеми определяете множества к которым относится элемент. Тем самым структуры данных (связи между элементами) определена указанными ключами.
+
+Элементы можете получить как множество, ключи которого
+* Полностью соответствуют указанным ключам (eq)
+* Элемент присутствует в выборке если переданные ключи содержатся в ключах элемента (contains)
+* Элемент присутствует в выборке если его ключи пересекаются с указанными ключами (overlap)
+
+(Указанными ключами называют такие ключи, которые указал пользователь.)
+
+Подмножество содержит в себе только один элемент если один из его ключей равен **uniq**. Уникальность определена по всем ключам элемента одновременно. И эта уникальность сохраняется в рамках текущих ключей.
 
 ## api
 
@@ -12,9 +23,7 @@
 | /api/v1/values/ | CRUD |
 | /api/v1/values/search/eq/{keys} | Поиск записей по точному совпадению ключей |
 | /api/v1/values/search/any/{keys} | Поиск всех записей в которых встрачется хотя бы один ключ из keys |
-| /api/v1/values/search/contains/{keys} | Поиск всех записей в которых keys является подмножеством |
-
-Про any, contains см. подробней в описании [postgresql array functions](http://www.postgresql.org/docs/9.4/static/functions-array.html) для операторов **&&** и **@>**.
+| /api/v1/values/search/contains/{keys} | Поиск всех записей в которых keys содержатся у ключей элемента |
 
 # Примеры использования
 
@@ -25,7 +34,7 @@
 
 ### многоуровневый TODO лист
 
-[todo list](web/example/todolist.html)
+[todo list](web/example/all.html)
 
 ![многоуровневый todo list](images/magickey_todolist.gif)
 
@@ -71,7 +80,15 @@ magickeys=#
 
 Динамические поля\столбцы управляющийся через конструктор.
 
-## database schema
+...
+
+# Backend
+
+Об overlap, contains см. подробней в описании [postgresql array functions](http://www.postgresql.org/docs/9.4/static/functions-array.html) для операторов **&&** и **@>**.
+
+РСУБД Postgres
+
+## Database schema
 
 ``` sql
 create function sort_text_array(text[]) returns text[][] as $$
@@ -94,4 +111,17 @@ CREATE INDEX values_keys_idx on values USING GIN (keys);
 CREATE UNIQUE INDEX values_keys_ifuniq_idx on values (sort_text_array(keys))
     WHERE keys @> '{uniq}';
 
+```
+
+## eq
+
+```
+SELECT * FROM values WHERE sort_text_array(keys) = sort_text_array('{key1, key2}')
+```
+
+## contains, ovarlap
+
+```
+SELECT * FROM values WHERE keys @> '{key1, key2}';
+SELECT * FROM values WHERE keys && '{key1, key2}';
 ```
