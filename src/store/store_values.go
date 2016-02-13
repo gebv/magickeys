@@ -51,7 +51,12 @@ func (s *ValueStore) FindByKeys(dto *models.ValueDTO, mode string) (res []models
 
 	query := SqlSelect(model.TableName(), fields)
 	// any - "&&", contains - "@>"", equal - "="
-	query += fmt.Sprintf(" WHERE keys %s ? AND is_removed = false", mode)
+	if mode == "=" {
+		query += fmt.Sprintf(" WHERE sort_text_array(keys) %s sort_text_array(?) AND is_removed = false", mode)	
+	} else {
+		query += fmt.Sprintf(" WHERE keys %s ? AND is_removed = false", mode)
+	}
+	
 	
 	query = FormateToPQuery(query)
 
