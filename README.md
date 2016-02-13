@@ -98,7 +98,10 @@ $ tree -L 2
 
 ### многоуровневый TODO лист
 
-todo list __web/examples/list.html__ 
+Каждый элемент списка содержит в себе подсписок.
+Каждый элемент списка может хранить булевое состояние done\notdone.
+
+[Исходник примера](web/examples/list.html)
 
 ![многоуровневый todo list](images/magickey_itemlist.gif)
 
@@ -184,6 +187,120 @@ is_enabled | t
 is_removed | f
 created_at | 2016-02-13 11:00:11.506226
 updated_at | 2016-02-13 11:00:24.35061
+
+magickeys=#
+```
+
+### Список с категориями
+
+Каждый элемент списка может относиться к одной и более категории.
+
+[Исходник примера](web/examples/listwithcategories.html)
+
+![Список с категориями](images/magickey_itemwithcategories.gif)
+
+```
+magickeys=# SELECT * FROM values WHERE keys @> '{examples,listwithcategories}';
+-[ RECORD 1 ]-----------------------------------------------------------------------------------------
+value_id   | 04e03592-d25d-11e5-87e7-10ddb19b9d24
+keys       | {examples,factory_categories,listwithcategories}
+value      | c1
+props      | {"ts": 1455373266008}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 14:21:06.026229
+updated_at | 2016-02-13 14:21:06.026229
+-[ RECORD 2 ]-----------------------------------------------------------------------------------------
+value_id   | 0559f3ae-d25d-11e5-87e7-10ddb19b9d24
+keys       | {examples,factory_categories,listwithcategories}
+value      | c2
+props      | {"ts": 1455373266805}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 14:21:06.824082
+updated_at | 2016-02-13 14:21:06.824082
+-[ RECORD 3 ]-----------------------------------------------------------------------------------------
+value_id   | 05ebead2-d25d-11e5-87e7-10ddb19b9d24
+keys       | {examples,factory_categories,listwithcategories}
+value      | c3
+props      | {"ts": 1455373267762}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 14:21:07.78068
+updated_at | 2016-02-13 14:21:07.78068
+-[ RECORD 4 ]-----------------------------------------------------------------------------------------
+value_id   | 06c31f02-d25d-11e5-87e7-10ddb19b9d24
+keys       | {examples,items,listwithcategories}
+value      | item 1
+props      | {"ts": 1455373269168}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 14:21:09.19104
+updated_at | 2016-02-13 14:21:09.19104
+-[ RECORD 5 ]-----------------------------------------------------------------------------------------
+value_id   | 0788435f-d25d-11e5-87e7-10ddb19b9d24
+keys       | {examples,items,listwithcategories}
+value      | item 2
+props      | {"ts": 1455373270462}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 14:21:10.48303
+updated_at | 2016-02-13 14:21:10.483031
+-[ RECORD 6 ]-----------------------------------------------------------------------------------------
+value_id   | 0897a703-d25d-11e5-87e7-10ddb19b9d24
+keys       | {examples,items,listwithcategories}
+value      | item 3
+props      | {"ts": 1455373272231}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 14:21:12.261607
+updated_at | 2016-02-13 14:21:12.261607
+-[ RECORD 7 ]-----------------------------------------------------------------------------------------
+value_id   | 0946acad-d25d-11e5-87e7-10ddb19b9d24
+keys       | {0897a703-d25d-11e5-87e7-10ddb19b9d24,examples,group_categories,items,listwithcategories}
+value      | 0559f3ae-d25d-11e5-87e7-10ddb19b9d24
+props      | {"ts": 1455373273379}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 14:21:13.408632
+updated_at | 2016-02-13 14:21:15.720622
+-[ RECORD 8 ]-----------------------------------------------------------------------------------------
+value_id   | 09cf58eb-d25d-11e5-87e7-10ddb19b9d24
+keys       | {0897a703-d25d-11e5-87e7-10ddb19b9d24,examples,group_categories,items,listwithcategories}
+value      | 04e03592-d25d-11e5-87e7-10ddb19b9d24
+props      | {"ts": 1455373274278}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 14:21:14.304331
+updated_at | 2016-02-13 14:21:17.345232
+-[ RECORD 9 ]-----------------------------------------------------------------------------------------
+value_id   | 0d932d3d-d25d-11e5-87e7-10ddb19b9d24
+keys       | {examples,factory_categories,listwithcategories}
+value      | c4
+props      | {"ts": 1455373280599}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 14:21:20.620883
+updated_at | 2016-02-13 14:21:20.620883
+-[ RECORD 10 ]----------------------------------------------------------------------------------------
+value_id   | 0c7b9ef0-d25d-11e5-87e7-10ddb19b9d24
+keys       | {0788435f-d25d-11e5-87e7-10ddb19b9d24,examples,group_categories,items,listwithcategories}
+value      | 0d932d3d-d25d-11e5-87e7-10ddb19b9d24
+props      | {"ts": 1455373278766}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-13 14:21:18.788786
+updated_at | 2016-02-13 14:21:22.463049
 
 magickeys=#
 ```

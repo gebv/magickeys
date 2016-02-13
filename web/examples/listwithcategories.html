@@ -1,0 +1,166 @@
+<meta charset="utf-8">
+<title>List with categories</title>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/uikit/2.24.3/css/uikit.almost-flat.css">
+<body>
+	<div class="uk-grid">
+		<p class="uk-h2 uk-width-1-1">Items with categories</p>
+		<div class="uk-container-center uk-width-4-10">
+			<p>Categories:</p>
+			<div id="w_category_creator"></div>
+			<div id="w_categories"></div>
+		</div>	
+		<div class="uk-container-center uk-width-6-10">
+			<p>Items with categories</p>
+			<div id="w_items_with_categories_creator"></div>
+			<div id="w_items_with_categories"></div>
+		</div>	
+	</div>
+</body>
+<script src="//cdnjs.cloudflare.com/ajax/libs/mithril/0.2.1/mithril.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js"></script>
+<script src="utils.js"></script>
+<script>
+	var keys = ["examples", "listwithcategories"]
+
+	app.init(keys);
+
+	// Select box
+	var SelectBox = {
+		controller: function(c) {
+			var api = {
+				onChange: function() {
+					return function(value) {
+						c.item.value(value)
+						c.onChangeCategory(c.item.value_id(), value)
+						// console.log(c.related_item.value_id(), value);
+					}
+				}
+			};
+
+			api = _.merge({}, api, c);
+
+			return api;
+		},
+		view: function(c) {
+			var isNew = app.isNewItem(c.item.value_id());
+			var isPending = app.isPendingItem(c.item.value_id());
+
+			var categories = _.map(app.getItemsByKeys(c.factory_classifer_categoriy_keys), function(item) {
+				return m("option", {value: item.data.value_id()}, item.data.value());
+			})
+
+			categories.unshift(m("option", {value: ""}, "--select--"));
+
+			var key =  c.item.value_id()+":"+c.item.props().ts;
+			var config = _.merge({}, c.item_config.element_config, {key: key, oninput: m.withAttr("value", c.onChange()), value: c.item.value()})
+
+			return (isNew || isPending)? m("i.uk-icon-spin uk-icon-spinner"): m("select", config, categories);
+		}
+	}
+
+	var ItemWithSetOfCategories = {
+		controller: function(c) {
+			var api = {
+				onCreateCategoryForItem: function(for_item_value_id) {
+					return function(e) {
+						e.preventDefault();
+
+						// Создали новую категорию для текущего элемента
+						app.createItem({value: "", keys: this.factory_categories_keys()}, ["value"])
+							.then(function(res){
+							})
+						return false;
+					}.bind(this)
+				},
+
+				keys: function(){
+					// Функцией потому что c.item.value_id() обновится после подтверждения на создание
+					_.concat(c.keys, c.item.value_id())
+				},
+
+				// Ключи для получения категорий текущего элемента
+				factory_categories_keys: function(){
+					// Функцией потому что c.item.value_id() обновится после подтверждения на создание
+					return _.concat(c.keys, c.item.value_id(), "group_categories")
+				}
+			};
+
+			api = _.merge({}, api, c);
+
+			return api;
+		},
+		view: function(c) {
+			var isNew = app.isNewItem(c.item.value_id());
+			var isPending = app.isPendingItem(c.item.value_id());
+
+			var className = isNew? "uk-text-muted": "";
+			
+			// Select box
+			// var selectBoxCategories = m.component(SelectBox, {keys: c.factory_categoriy_keys, element_classes: ["uk-width-1-1"]});
+
+			// Список selectboxов
+			var groupSelectBoxesCategories = m("span");
+			var creatorCategory = m("span");
+
+			if (!(isNew || isPending)) {
+				groupSelectBoxesCategories = m.component(ItemList, 
+					{	
+						keys: c.factory_categories_keys(),
+
+						// Представление каждого элемента - это селектбокс
+						item_view: SelectBox,
+
+						element: "div.uk-form",
+
+						item_config: {
+
+							// Каждый селектбокс состоит из классификатора (не динамическое значенгие)
+							factory_classifer_categoriy_keys: c.factory_classifer_categoriy_keys,
+
+							onChangeCategory: function(item_category_id, selected_category_id) {
+								// для c.item.value_id() обновлена одна из категорий
+
+								updateItem(item_category_id, {value: selected_category_id}, ["value"])
+									.then(function(){})
+							},
+
+							element_config: {className: "uk-width-1-1"}
+						}
+					});
+
+				creatorCategory = m("a.uk-button uk-width-1-1", {onclick: c.onCreateCategoryForItem(c.item.value_id())}, "Add category");
+			}
+
+			var key =  c.item.value_id()+":"+c.item.props().ts;
+			var config = _.merge({}, c.item_config.element_config, {key: key})
+
+			var item = m("li", config, [
+				// m("pre", [c.item.value_id(), c.item.value(), JSON.stringify(c.item.props())].join("\n")),
+				(isPending || isNew)? m("i.uk-margin-right uk-icon-spin uk-icon-spinner"): m("span"),
+
+				m("span", {className: className}, c.item.value()),
+				m("p", "Categories"),
+				!isPending || isNew? 
+					[creatorCategory, groupSelectBoxesCategories]: 
+					m("span"),
+
+				]);
+			return item;
+		}
+	}
+
+	m.mount(document.getElementById("w_category_creator"), m.component(ItemListCreater, {placeholder: "qwd", keys: _.concat(keys, "factory_categories")}));
+	m.mount(document.getElementById("w_categories"), m.component(ItemList, {keys: _.concat(keys, "factory_categories")}));
+
+	m.mount(document.getElementById("w_items_with_categories_creator"), m.component(ItemListCreater, {keys: _.concat(keys, "items")}));
+	m.mount(document.getElementById("w_items_with_categories"), m.component(ItemList, 
+		{
+			keys: _.concat(keys, "items"), 
+			item_view: ItemWithSetOfCategories,
+			element: "ul.uk-list uk-list-line uk-list-space",
+			item_config: {
+				factory_classifer_categoriy_keys: _.concat(keys, "factory_categories")
+			}
+		}
+		));
+</script>
