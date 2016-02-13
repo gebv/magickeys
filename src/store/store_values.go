@@ -102,13 +102,44 @@ func (s *ValueStore) Create(dto *models.ValueDTO) (models.Model, error) {
 	model.TransformFrom(dto)
 	model.ValueId = uuid.NewV1()
 
-	fields, _ := model.Fields()
+	model.BeforeCreate()
+	model.BeforeSave()
 
-	if err := CreateModel(model, s.db, dto.Tx, fields...); err != nil {
-		return nil, err
+	var err error 
+
+	query := fmt.Sprintf("INSERT INTO %s(keys, value_id, value, props, flags, is_enabled, is_removed, created_at, updated_at) VALUES(sort_text_array(?), ?, ?, ?, ?, ?, ?, ?, ?)", model.TableName())
+	where := fmt.Sprintf(" RETURNING %s", model.PrimaryName())
+
+	query = FormateToPQuery(query+where)
+
+	if dto.Tx != nil {
+		err = dto.Tx.QueryRow(query, 
+			model.Keys,
+			model.ValueId,
+			model.Value,
+			model.Props,
+			model.Flags,
+			model.IsEnabled,
+			model.IsRemoved,
+			model.CreatedAt,
+			model.UpdatedAt,
+			).Scan(&model.ValueId)
+
+	} else {
+		err = s.db.QueryRow(query, 
+			model.Keys,
+			model.ValueId,
+			model.Value,
+			model.Props,
+			model.Flags,
+			model.IsEnabled,
+			model.IsRemoved,
+			model.CreatedAt,
+			model.UpdatedAt,
+			).Scan(&model.ValueId)
 	}
 
-	return model, nil
+	return model, err
 }
 
 func (s *ValueStore) GetOne(dto *models.ValueDTO) (models.Model, error) {

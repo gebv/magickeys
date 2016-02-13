@@ -28,6 +28,7 @@ func TestUpdateValue(t *testing.T) {
 
 	dto.ValueId = value.PrimaryValue().String()
 	dto.Value = "new value"
+	dto.UpdateFields = []string{"value"}
 	_, err = _s.Get("value").(*ValueStore).Update(dto)
 
 	if err != nil {
@@ -35,6 +36,10 @@ func TestUpdateValue(t *testing.T) {
 		return
 	}
 
+	dto.Keys = models.StringArray{}
+	dto.Keys.Add(key3)
+	dto.Keys.Add(key1)
+	dto.Keys.Add(key2)
 	values, err := _s.Get("value").(*ValueStore).FindByKeys(dto, "=")
 
 	if err != nil {
