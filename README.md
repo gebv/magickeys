@@ -98,9 +98,9 @@ $ tree -L 2
 
 ### многоуровневый TODO лист
 
-[todo list](web/example/all.html)
+todo list __web/examples/list.html__ 
 
-![многоуровневый todo list](images/magickey_todolist.gif)
+![многоуровневый todo list](images/magickey_itemlist.gif)
 
 ```
 magickeys=# SELECT keys, value, props FROM values;
