@@ -134,7 +134,8 @@ var app = {
 			is_removed: _item.data.is_removed(),
 		}
 
-		_itemData = _.merge({}, _itemData, item);
+		_itemData = _.assign({}, _itemData, item);
+		console.log(_itemData.flags)
 		_item.data = NewItem(_itemData)
 
 		_item.isPending(true);
@@ -145,7 +146,7 @@ var app = {
 					_item.data.created_at(res.data.created_at);
 					_item.data.updated_at(res.data.updated_at);
 					_item.isPending(false);
-					return newItem;
+					return _item;
 				} else {
 					var message = ["Ошибка обновления"];
 					message.push("value_id: "+value_id)
@@ -161,7 +162,7 @@ var app = {
 
 	init: function(keys) {
 		// Загрузка всех позиций в которых ключи пересекаются с keys
-		m.request({url: findItemsBuildURL("contains", keys)})
+		return m.request({url: findItemsBuildURL("contains", keys)})
 			.then(function(res){
 				if (res.status_code == 200 && res.data) {
 					_.each(res.data, this._addItem.bind(this));
@@ -171,9 +172,19 @@ var app = {
 
 	// Выборка всех позиций с точным совпадением ключей
 	getItemsByKeys: function(keys) {
+
 		return _(this.items())
 			.filter(function(item){
 				return keysToString(item.keys) == keysToString(keys);
+			})
+			.orderBy(function(item){return item.data.props().ts}, "desc")
+			.value();
+	},
+
+	getItemsByIds: function(ids) {
+		return _(this.items())
+			.filter(function(item){
+				return _.intersection(ids, [item.value_id]).length == 1;
 			})
 			.orderBy(function(item){return item.data.props().ts}, "desc")
 			.value();
@@ -204,7 +215,6 @@ var ItemList = {
 		return api;
 	},
 	view: function(c) {
-
 		var list = _.map(app.getItemsByKeys(c.keys), function(item){
 			var config = _.merge({}, c.item_config, {item: item.data, item_config: {element_config: {key: item.data.value_id()}}}, c)
 			
@@ -221,6 +231,12 @@ var ItemListCreater = {
 	controller: function(c) {
 		var api = {
 			newItem: NewItem({keys: c.keys}),
+			onChangeValue: function() {
+				return function(value) {
+					this.newItem.value(value);
+					m.redraw.strategy("none");
+				}.bind(this);
+			},
 			onCreateItem: function() {
 				return function(e) {
 					e.preventDefault();
@@ -247,7 +263,8 @@ var ItemListCreater = {
 
 		var form = m("form.uk-form", {onsubmit: c.onCreateItem()}, [
 			m("input[type='text'].uk-width-1-1", {
-				oninput: m.withAttr("value", c.newItem.value), value: c.newItem.value()
+				placeholder: c.placeholder || "",
+				oninput: m.withAttr("value", c.onChangeValue()), value: c.newItem.value()
 				}),
 			]);
 		return m("div", form);

@@ -1,0 +1,305 @@
+<meta charset="utf-8">
+<title>Table constructor</title>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/uikit/2.24.3/css/uikit.almost-flat.css">
+<body>
+	<div class="uk-container">
+		<p class="uk-h2">Table constructor</p>
+		<div class="uk-grid">
+			<div class="uk-width-1-1 uk-overflow-container" id="w_table">
+				<table class="uk-table uk-table-striped uk-table-condensed uk-text-nowrap">
+                </table>
+            </div>
+		</div>	
+	</div>
+	<div class="uk-container">
+		<p>Factory rows and cols</p>
+		<div class="uk-grid">
+			<div class="uk-width-1-2">
+				<p>Rows</p>
+				<div id="w_factory_rows"></div>
+			</div>
+			<div class="uk-width-1-2">
+				<p>Cols</p>
+				<div id="w_factory_cols"></div>
+			</div>
+		</div>
+		<hr>
+		<p>Category items:</p>
+		<div class="uk-grid">
+			<div class="uk-width-1-1">
+				<div id="w_group_items"></div>
+			</div>	
+		</div>
+	</div>
+
+</body>
+<script src="//cdnjs.cloudflare.com/ajax/libs/mithril/0.2.1/mithril.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js"></script>
+<script src="utils.js"></script>
+<script>
+
+	// Custom view
+
+	var CategoryItem = {
+		controller: function(c) {
+			var api = {};
+			
+			api = _.merge({}, api, c);
+
+			return api;
+		},
+		view: function(c) {
+			
+			return m("li", {key: c.item.value_id()}, c.item.value());
+		}
+	}
+
+	var Category = {
+		controller: function(c) {
+			var api = {};
+
+			api = _.merge({}, api, c);
+
+			return api;
+		},
+		view: function(c) {
+			var controllers = m("i.uk-icon-cpin uk-icon-spinner");
+
+			var isPending = app.isPendingItem(c.item.value_id());
+			var isNew = app.isNewItem(c.item.value_id());
+
+			if (!(isPending || isNew)) {
+				controllers = [
+					[m.component(ItemListCreater, {placeholder: "New item", keys: _.concat(c.keys, c.item.value_id())})],
+					m.component(ItemList, {keys: _.concat(c.keys, c.item.value_id()), item_view: CategoryItem, element: "ol"})
+				];
+			}
+
+			return m("div.uk-width-1-1 uk-panel uk-panel-box", {key: c.item.value_id()}, [m("p.uk-panel-title", c.item.value()), controllers]);
+		}
+	}
+
+	var Categories = {
+		controller: function(c) {
+			var api = {};
+
+			api = _.merge({}, api, c);
+
+			return api;
+		},
+		view: function(c) {
+			var categoryCreator = m.component(ItemListCreater, {placeholder: "New category items", keys: _.concat(c.keys, "categories")});
+			var categories = m.component(ItemList, {
+				keys: _.concat(c.keys, "categories"), 
+				item_view: Category, 
+				item_config: {
+					keys: _.concat(c.keys, "categories")
+				}});
+
+			return m("div", [categoryCreator, categories])
+		}
+	}
+
+	var GroupSelect = {
+		controller: function(c) {
+			var api = {
+				isInit: m.prop(false),
+				isUpdated: m.prop(false), 
+				getFactoryOptions: function() {
+					return app.getItemsByKeys(_.concat(this.keys, this.role, "uniq"))[0];
+				},
+				getOptions: function() {
+					return _.map(app.getItemsByKeys(c.keys), function(item){
+						var selectedOptions = this.getFactoryOptions().data.flags();
+						var groupitems = _.map(app.getItemsByKeys(_.concat(c.keys, item.data.value_id())), function(_item){
+							var selected = _.intersection(selectedOptions, [_item.data.value_id()]).length == 1;
+
+							return m("option", {value: _item.data.value_id(), selected: selected? "selected": ""}, _item.data.value());
+						});
+
+						return m("optgroup", {label: item.data.value()}, groupitems)
+					}.bind(this));
+				},
+				onChange: function() {
+					return function(_options) {
+
+						if (!this.isInit()) {
+							return
+						}
+
+						var options = this.getFactoryOptions();
+
+						if (options.isNew() || options.isPending()) {
+							return
+						}
+
+						var selected = _(_options).filter(function(_option){return _option.selected}).map("value").value();
+						this.isUpdated(true);
+
+						console.log(selected)
+
+						app.updateItem(options.data.value_id(), {flags: selected}, ["flags"])
+							.then(function(res){
+								this.isUpdated(false);
+							}.bind(this))
+
+					}.bind(this)
+				},
+				init: function() {
+					if (!api.getFactoryOptions()) {
+						app.createItem({keys: _.concat(this.keys, this.role, "uniq")}, ["keys"])
+							.then(function(){
+								this.isInit(true)
+							}.bind(this));
+					} else {
+						this.isInit(true)
+					}
+				}
+			};
+
+			api = _.merge({}, api, c);
+
+			api.init();
+
+			return api;
+		}, 
+		view: function(c) {
+			if (!c.isInit()) {
+				return m("i.uk-icon-spin uk-icon-spinner")
+			}
+
+			var statusIndicator = c.isUpdated()? m("i.uk-icon-spin uk-icon-spinner"): m("span", "Saved");
+
+			return m("div.uk-form uk-width-1-1", [
+				m("select.uk-width-1-1", {size: "10", multiple: "multiple", onchange: m.withAttr("options", c.onChange())}, c.getOptions()),
+				statusIndicator
+				]);
+		}
+	}
+
+	var TableRow = {
+		controller: function(c) {
+			var api = {
+				key: c.col.value_id + ":" + c.row.value_id,
+				keys: _.concat(c.keys, "cell", "uniq", "col:"+c.col.value_id, "row:"+c.row.value_id),
+				item: {},
+				_reloadItem: function() {
+					this.item = app.getItemsByKeys(this.keys)[0];
+
+					if (!this.item) {
+						return
+					}
+
+					if (!this.item.hasOwnProperty("_lastValue")) {
+						this.item._lastValue = m.prop("");
+					}
+
+					this.item._lastValue(this.item.data.value());
+					console.log(this.item._lastValue())
+				},
+				onCreateValue: function() {
+					return function(e) {
+						e.preventDefault();
+						app.createItem({value: "", keys: this.keys}, ["value", "keys"])
+							.then(function(res){
+								this._reloadItem();
+							}.bind(this)); 	
+						return false;
+					}.bind(this);
+				},
+				_newValue: m.prop(""),
+				onChangeValueCell: function() {
+					return function(value) {
+						// m.redraw.strategy("none");
+						this.item.data.value(value);
+					}.bind(this)
+				},
+				isChanged: function() {
+					// console.log(this.item.data.value(), this.item._lastValue());
+					return this.item.data.value() != this.item._lastValue();
+				},
+				onSaveNewValue: function() {
+					return function(e) {
+						e.preventDefault();
+						app.updateItem(this.item.value_id, {value: this.item.data.value()}, ["value"])
+							.then(function(res){
+								this._reloadItem()
+							}.bind(this))
+						return false;
+					}.bind(this)
+				}
+			};
+
+			api = _.merge({}, api, c);
+			api._reloadItem();
+
+			return api;
+		},
+		view: function(c) {
+			var value = [];
+			
+			if (!!c.item) {
+				value.push(m("input[type='text']", {id: c.item.value_id, oninput: m.withAttr("value", c.onChangeValueCell()), value: c.item.data.value()}));
+
+				if (c.item.isPending() || c.item.isNew()) {
+					value.push(m("i.uk-icon-spin uk-icon-spinner"))	
+				} else if (c.isChanged()) {
+					value.push(m("a", {onclick: c.onSaveNewValue()}, m("i.uk-icon-save")));
+				}
+			}else {
+				value.push(m("a.uk-button uk-button-small", {onclick: c.onCreateValue()}, "+"));
+			}
+
+			return m("td", {key: c.key, title: [c.keys].join(" ")}, value);
+		}
+	}
+
+	var Table = {
+		controller: function(c) {
+			var api = {
+				getCols: function() {
+					var options =  app.getItemsByKeys(_.concat(this.keys, "categories", "cols", "uniq"))[0];
+					if (!options) return [];
+					return app.getItemsByIds(options.data.flags());
+				},
+				getRows: function() {
+					var options =  app.getItemsByKeys(_.concat(this.keys, "categories", "rows", "uniq"))[0];
+					if (!options) return [];
+					return app.getItemsByIds(options.data.flags());
+				}
+			};
+
+			api = _.merge({}, api, c);
+
+			return api;
+		},
+		view: function(c) {
+			var tableData = _.map(c.getRows(), function(row){
+				var cols = [m("td", row.data.value())];
+
+				_.each(c.getCols(), function(col) {
+					cols.push(m.component(TableRow, {col: col, row: row, keys: c.keys}));
+				});
+
+				return m("tr", cols);
+			})
+
+			var cols = [m("th", "")];
+			_.each(c.getCols(),function(item) {
+				cols.push(m("th", item.data.value()));
+			});
+
+			var thead = m("thead", m("tr", cols));
+			var tbody = m("tbody", tableData);
+	
+			return m("table.uk-table uk-table-striped uk-table-condensed uk-text-nowrap uk-form", [thead, tbody]);
+		}
+	}
+
+	app.init(["examples", "tablecontructor"]).then(function(){
+		m.mount(document.getElementById("w_table"), m.component(Table, {keys: ["examples", "tablecontructor"]}));
+		m.mount(document.getElementById("w_group_items"), m.component(Categories, {keys: ["examples", "tablecontructor"]}));
+		m.mount(document.getElementById("w_factory_rows"), m.component(GroupSelect, {keys: ["examples", "tablecontructor", "categories"], role: ["rows"]}));
+		m.mount(document.getElementById("w_factory_cols"), m.component(GroupSelect, {keys: ["examples", "tablecontructor", "categories"], role: ["cols"]}));
+	});
+</script>

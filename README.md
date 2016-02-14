@@ -16,6 +16,14 @@
 
 Подмножество содержит в себе только один элемент если один из его ключей равен **uniq**. Уникальность определена по всем ключам элемента одновременно. И эта уникальность сохраняется в рамках текущих ключей.
 
+* [api](#api)
+* [database schema](#database-schema)
+
+[Примеры](#Примеры-использования)
+* [Многоуровневый TODO лист](#многоуровневый-todo-лист)
+* [Список с категориями](#Список-с-категориями)
+* [Конструктор таблиц](#Таблицы-с-конструктором)
+
 # Установка и запуск
 
 ``` shell
@@ -93,15 +101,20 @@ $ tree -L 2
 
 В качестве фронтенда используется [mithril](http://mithril.js.org)
 
-* многоуровневый TODO лист
-* Таблицы (с конструктором)
+* [Многоуровневый TODO лист](#многоуровневый-todo-лист)
+* [Список с категориями](#Список-с-категориями)
+* [Конструктор таблиц](#Таблицы-с-конструктором)
 
 ### многоуровневый TODO лист
 
 Каждый элемент списка содержит в себе подсписок.
 Каждый элемент списка может хранить булевое состояние done\notdone.
 
-[Исходник примера](web/examples/list.html)
+* элементы первого уровня имеют ключи [examples,simplelist]
+* элементы второго уровня имеют ключи [examples,simplelist, **uuid**]. Где **uuid** является родителем и тп
+* кол-во uuid в ключе определяет уровень вложенности
+
+[Исходник](web/examples/list.html)
 
 ![многоуровневый todo list](images/magickey_itemlist.gif)
 
@@ -193,9 +206,13 @@ magickeys=#
 
 ### Список с категориями
 
-Каждый элемент списка может относиться к одной и более категории.
+Каждый элемент списка (карточка) может относиться к одной и более категории.
 
-[Исходник примера](web/examples/listwithcategories.html)
+* Записи с ключами [examples,listwithcategories, **factory_categories**] определяют категорию
+* Записи с ключами [examples,listwithcategories, **items**] определяют список карточек
+* Категории, к которым относится карточка определена у записей с ключами [examples,listwithcategories, items, **group_categories**, **uuid_item**]. В качестве значения хранится идентификатор категории. **uuid_item** идентификатор карточки.
+
+[Исходник](web/examples/listwithcategories.html)
 
 ![Список с категориями](images/magickey_itemwithcategories.gif)
 
@@ -309,7 +326,211 @@ magickeys=#
 
 Динамические поля\столбцы управляющийся через конструктор.
 
-...
+* Записи с ключами [examples,**factory_categories**,listwithcategories] определяют группы категорий
+* Записи с ключами [**uuid**,**categories**,examples,tablecontructor] определяют содержимое категорий. **uuid** идиентификатор категории к которой относится текущая запись
+* Записи с ключами [**categories**,**cols**,examples,tablecontructor,**uniq**] правило образования колонок (из категорий)
+* Записи с ключами [**categories**,**rows**,examples,tablecontructor,**uniq**] правило образования строк (из категорий)
+* Записи с ключами [cell,col:**uuid**,examples,row:**uuid**,tablecontructor,**uniq**] хранят значение ячейки таблицы. col:**uuid** идентификатор категории к которой относится столбец. row:**uuid** идентификатор категории к которой относится строка
+
+[Исходник](web/examples/tableconstructor.html)
+
+![Конструктор таблиц](images/magickey_tableconstructor.gif)
+
+```
+magickeys=# SELECT * FROM values WHERE keys @> '{examples,tablecontructor}';
+-[ RECORD 1 ]----------------------------------------------------------------------------------------------------------------------
+value_id   | b238f8bd-d315-11e5-8a3b-10ddb19b9d24
+keys       | {categories,examples,tablecontructor}
+value      | cat 1
+props      | {"ts": 1455452584227}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:04.252025
+updated_at | 2016-02-14 12:23:04.252025
+-[ RECORD 2 ]----------------------------------------------------------------------------------------------------------------------
+value_id   | b301bed1-d315-11e5-8a3b-10ddb19b9d24
+keys       | {categories,examples,tablecontructor}
+value      | cat 2
+props      | {"ts": 1455452585542}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:05.567816
+updated_at | 2016-02-14 12:23:05.567816
+-[ RECORD 3 ]----------------------------------------------------------------------------------------------------------------------
+value_id   | b56eaa6b-d315-11e5-8a3b-10ddb19b9d24
+keys       | {b301bed1-d315-11e5-8a3b-10ddb19b9d24,categories,examples,tablecontructor}
+value      | 1
+props      | {"ts": 1455452589615}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:09.637079
+updated_at | 2016-02-14 12:23:09.63708
+-[ RECORD 4 ]----------------------------------------------------------------------------------------------------------------------
+value_id   | b5c49add-d315-11e5-8a3b-10ddb19b9d24
+keys       | {b301bed1-d315-11e5-8a3b-10ddb19b9d24,categories,examples,tablecontructor}
+value      | 2
+props      | {"ts": 1455452590177}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:10.200291
+updated_at | 2016-02-14 12:23:10.200291
+-[ RECORD 5 ]----------------------------------------------------------------------------------------------------------------------
+value_id   | b5fc261a-d315-11e5-8a3b-10ddb19b9d24
+keys       | {b301bed1-d315-11e5-8a3b-10ddb19b9d24,categories,examples,tablecontructor}
+value      | 3
+props      | {"ts": 1455452590537}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:10.564303
+updated_at | 2016-02-14 12:23:10.564304
+-[ RECORD 6 ]----------------------------------------------------------------------------------------------------------------------
+value_id   | b786c788-d315-11e5-8a3b-10ddb19b9d24
+keys       | {b238f8bd-d315-11e5-8a3b-10ddb19b9d24,categories,examples,tablecontructor}
+value      | 1
+props      | {"ts": 1455452593125}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:13.150555
+updated_at | 2016-02-14 12:23:13.150555
+-[ RECORD 7 ]----------------------------------------------------------------------------------------------------------------------
+value_id   | b7b9a8da-d315-11e5-8a3b-10ddb19b9d24
+keys       | {b238f8bd-d315-11e5-8a3b-10ddb19b9d24,categories,examples,tablecontructor}
+value      | 2
+props      | {"ts": 1455452593459}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:13.484003
+updated_at | 2016-02-14 12:23:13.484003
+-[ RECORD 8 ]----------------------------------------------------------------------------------------------------------------------
+value_id   | b80f7fb6-d315-11e5-8a3b-10ddb19b9d24
+keys       | {b238f8bd-d315-11e5-8a3b-10ddb19b9d24,categories,examples,tablecontructor}
+value      | 3
+props      | {"ts": 1455452594015}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:14.046559
+updated_at | 2016-02-14 12:23:14.046559
+-[ RECORD 9 ]----------------------------------------------------------------------------------------------------------------------
+value_id   | bc115163-d315-11e5-8a3b-10ddb19b9d24
+keys       | {cell,col:b80f7fb6-d315-11e5-8a3b-10ddb19b9d24,examples,row:b5fc261a-d315-11e5-8a3b-10ddb19b9d24,tablecontructor,uniq}
+value      | a
+props      | {"ts": 1455452600744}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:20.769367
+updated_at | 2016-02-14 12:23:40.895654
+-[ RECORD 10 ]---------------------------------------------------------------------------------------------------------------------
+value_id   | bfb010f9-d315-11e5-8a3b-10ddb19b9d24
+keys       | {cell,col:b80f7fb6-d315-11e5-8a3b-10ddb19b9d24,examples,row:b5c49add-d315-11e5-8a3b-10ddb19b9d24,tablecontructor,uniq}
+value      | b
+props      | {"ts": 1455452606818}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:26.842905
+updated_at | 2016-02-14 12:23:42.120283
+-[ RECORD 11 ]---------------------------------------------------------------------------------------------------------------------
+value_id   | c10e6d56-d315-11e5-8a3b-10ddb19b9d24
+keys       | {cell,col:b80f7fb6-d315-11e5-8a3b-10ddb19b9d24,examples,row:b56eaa6b-d315-11e5-8a3b-10ddb19b9d24,tablecontructor,uniq}
+value      | c
+props      | {"ts": 1455452609114}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:29.139029
+updated_at | 2016-02-14 12:23:42.491191
+-[ RECORD 12 ]---------------------------------------------------------------------------------------------------------------------
+value_id   | c18a1a90-d315-11e5-8a3b-10ddb19b9d24
+keys       | {cell,col:b7b9a8da-d315-11e5-8a3b-10ddb19b9d24,examples,row:b5fc261a-d315-11e5-8a3b-10ddb19b9d24,tablecontructor,uniq}
+value      | d
+props      | {"ts": 1455452609924}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:29.949557
+updated_at | 2016-02-14 12:23:43.203392
+-[ RECORD 13 ]---------------------------------------------------------------------------------------------------------------------
+value_id   | c207edc4-d315-11e5-8a3b-10ddb19b9d24
+keys       | {cell,col:b7b9a8da-d315-11e5-8a3b-10ddb19b9d24,examples,row:b5c49add-d315-11e5-8a3b-10ddb19b9d24,tablecontructor,uniq}
+value      | f
+props      | {"ts": 1455452610742}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:30.774164
+updated_at | 2016-02-14 12:23:43.729325
+-[ RECORD 14 ]---------------------------------------------------------------------------------------------------------------------
+value_id   | c24693b3-d315-11e5-8a3b-10ddb19b9d24
+keys       | {cell,col:b7b9a8da-d315-11e5-8a3b-10ddb19b9d24,examples,row:b56eaa6b-d315-11e5-8a3b-10ddb19b9d24,tablecontructor,uniq}
+value      | g
+props      | {"ts": 1455452611161}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:31.184735
+updated_at | 2016-02-14 12:23:44.381376
+-[ RECORD 15 ]---------------------------------------------------------------------------------------------------------------------
+value_id   | c29e5bcf-d315-11e5-8a3b-10ddb19b9d24
+keys       | {cell,col:b786c788-d315-11e5-8a3b-10ddb19b9d24,examples,row:b5fc261a-d315-11e5-8a3b-10ddb19b9d24,tablecontructor,uniq}
+value      | t
+props      | {"ts": 1455452611734}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:31.760021
+updated_at | 2016-02-14 12:23:45.003955
+-[ RECORD 16 ]---------------------------------------------------------------------------------------------------------------------
+value_id   | c336ee7b-d315-11e5-8a3b-10ddb19b9d24
+keys       | {cell,col:b786c788-d315-11e5-8a3b-10ddb19b9d24,examples,row:b5c49add-d315-11e5-8a3b-10ddb19b9d24,tablecontructor,uniq}
+value      | e
+props      | {"ts": 1455452612735}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:32.759923
+updated_at | 2016-02-14 12:23:45.507216
+-[ RECORD 17 ]---------------------------------------------------------------------------------------------------------------------
+value_id   | c376f9e6-d315-11e5-8a3b-10ddb19b9d24
+keys       | {cell,col:b786c788-d315-11e5-8a3b-10ddb19b9d24,examples,row:b56eaa6b-d315-11e5-8a3b-10ddb19b9d24,tablecontructor,uniq}
+value      | d
+props      | {"ts": 1455452613152}
+flags      | {}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:23:33.179646
+updated_at | 2016-02-14 12:23:45.95705
+-[ RECORD 18 ]---------------------------------------------------------------------------------------------------------------------
+value_id   | 56ec4796-d315-11e5-8a3b-10ddb19b9d24
+keys       | {categories,examples,rows,tablecontructor,uniq}
+value      |
+props      | {"ts": 1455452431060}
+flags      | {b5fc261a-d315-11e5-8a3b-10ddb19b9d24,b5c49add-d315-11e5-8a3b-10ddb19b9d24,b56eaa6b-d315-11e5-8a3b-10ddb19b9d24}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:20:31.076751
+updated_at | 2016-02-14 12:23:17.502437
+-[ RECORD 19 ]---------------------------------------------------------------------------------------------------------------------
+value_id   | 56ece9b9-d315-11e5-8a3b-10ddb19b9d24
+keys       | {categories,cols,examples,tablecontructor,uniq}
+value      |
+props      | {"ts": 1455452431063}
+flags      | {b80f7fb6-d315-11e5-8a3b-10ddb19b9d24,b7b9a8da-d315-11e5-8a3b-10ddb19b9d24,b786c788-d315-11e5-8a3b-10ddb19b9d24}
+is_enabled | t
+is_removed | f
+created_at | 2016-02-14 12:20:31.080902
+updated_at | 2016-02-14 12:23:19.502804
+
+magickeys=#
+```
 
 # Backend
 
