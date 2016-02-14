@@ -50,7 +50,7 @@
 		},
 		view: function(c) {
 			
-			return m("li", {key: c.item.value_id()}, c.item.value());
+			return m("li", {key: c.item.value_id()}, c.item.value().label);
 		}
 	}
 
@@ -75,7 +75,7 @@
 				];
 			}
 
-			return m("div.uk-width-1-1 uk-panel uk-panel-box", {key: c.item.value_id()}, [m("p.uk-panel-title", c.item.value()), controllers]);
+			return m("div.uk-width-1-1 uk-panel uk-panel-box", {key: c.item.value_id()}, [m("p.uk-panel-title", c.item.value().label), controllers]);
 		}
 	}
 
@@ -110,14 +110,14 @@
 				},
 				getOptions: function() {
 					return _.map(app.getItemsByKeys(c.keys), function(item){
-						var selectedOptions = this.getFactoryOptions().data.flags();
+						var selectedOptions = this.getFactoryOptions().data.value()["options"];
 						var groupitems = _.map(app.getItemsByKeys(_.concat(c.keys, item.data.value_id())), function(_item){
 							var selected = _.intersection(selectedOptions, [_item.data.value_id()]).length == 1;
 
-							return m("option", {value: _item.data.value_id(), selected: selected? "selected": ""}, _item.data.value());
+							return m("option", {value: _item.data.value_id(), selected: selected? "selected": ""}, _item.data.value().label);
 						});
 
-						return m("optgroup", {label: item.data.value()}, groupitems)
+						return m("optgroup", {label: item.data.value().label}, groupitems)
 					}.bind(this));
 				},
 				onChange: function() {
@@ -138,7 +138,9 @@
 
 						console.log(selected)
 
-						app.updateItem(options.data.value_id(), {flags: selected}, ["flags"])
+						options.data.value()["options"] = selected
+
+						app.updateItem(options.data.value_id(), {}, ["value"])
 							.then(function(res){
 								this.isUpdated(false);
 							}.bind(this))
@@ -194,13 +196,13 @@
 						this.item._lastValue = m.prop("");
 					}
 
-					this.item._lastValue(this.item.data.value());
+					this.item._lastValue(this.item.data.value()["value"]);
 					console.log(this.item._lastValue())
 				},
 				onCreateValue: function() {
 					return function(e) {
 						e.preventDefault();
-						app.createItem({value: "", keys: this.keys}, ["value", "keys"])
+						app.createItem({value: {value: ""}, keys: this.keys}, ["value", "keys"])
 							.then(function(res){
 								this._reloadItem();
 							}.bind(this)); 	
@@ -211,17 +213,18 @@
 				onChangeValueCell: function() {
 					return function(value) {
 						// m.redraw.strategy("none");
-						this.item.data.value(value);
+						this.item.data.value()["value"] = value;
 					}.bind(this)
 				},
 				isChanged: function() {
 					// console.log(this.item.data.value(), this.item._lastValue());
-					return this.item.data.value() != this.item._lastValue();
+					return this.item.data.value()["value"] != this.item._lastValue();
 				},
 				onSaveNewValue: function() {
 					return function(e) {
 						e.preventDefault();
-						app.updateItem(this.item.value_id, {value: this.item.data.value()}, ["value"])
+						// this.item.data.value()
+						app.updateItem(this.item.value_id, {}, ["value"])
 							.then(function(res){
 								this._reloadItem()
 							}.bind(this))
@@ -239,7 +242,7 @@
 			var value = [];
 			
 			if (!!c.item) {
-				value.push(m("input[type='text']", {id: c.item.value_id, oninput: m.withAttr("value", c.onChangeValueCell()), value: c.item.data.value()}));
+				value.push(m("input[type='text']", {id: c.item.value_id, oninput: m.withAttr("value", c.onChangeValueCell()), value: c.item.data.value()["value"]}));
 
 				if (c.item.isPending() || c.item.isNew()) {
 					value.push(m("i.uk-icon-spin uk-icon-spinner"))	
@@ -260,12 +263,12 @@
 				getCols: function() {
 					var options =  app.getItemsByKeys(_.concat(this.keys, "categories", "cols", "uniq"))[0];
 					if (!options) return [];
-					return app.getItemsByIds(options.data.flags());
+					return app.getItemsByIds(options.data.value()["options"]);
 				},
 				getRows: function() {
 					var options =  app.getItemsByKeys(_.concat(this.keys, "categories", "rows", "uniq"))[0];
 					if (!options) return [];
-					return app.getItemsByIds(options.data.flags());
+					return app.getItemsByIds(options.data.value()["options"]);
 				}
 			};
 
@@ -275,7 +278,7 @@
 		},
 		view: function(c) {
 			var tableData = _.map(c.getRows(), function(row){
-				var cols = [m("td", row.data.value())];
+				var cols = [m("td", row.data.value().label)];
 
 				_.each(c.getCols(), function(col) {
 					cols.push(m.component(TableRow, {col: col, row: row, keys: c.keys}));
@@ -286,7 +289,7 @@
 
 			var cols = [m("th", "")];
 			_.each(c.getCols(),function(item) {
-				cols.push(m("th", item.data.value()));
+				cols.push(m("th", item.data.value().label));
 			});
 
 			var thead = m("thead", m("tr", cols));

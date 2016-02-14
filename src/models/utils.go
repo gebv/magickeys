@@ -69,6 +69,10 @@ func (c *StringArray) FromArray(v interface{}) *StringArray {
 		for _, _v := range v.([]string) {
 			c.Add(_v)
 		}
+	case []interface{}:
+		for _, _v := range v.([]interface{}) {
+			c.Add(_v.(string))
+		}
 	case StringArray:
 		for _, _v := range []string(v.(StringArray)) {
 			c.Add(_v)

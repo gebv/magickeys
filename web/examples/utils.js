@@ -17,30 +17,13 @@ var keysToString = function(keys) {
 var NewItem = function(item){
 	return {
 		value_id: m.prop(item && item.value_id || ""),
-		value: m.prop(item && item.value || ""),
+		value: m.prop(item && item.value || {}),
 		keys: m.prop(item && item.keys || []),
-		props: m.prop(item && item.props || {ts: 0}),
-		flags: m.prop(item && item.flags || []),
 		created_at: m.prop(item && item.created_at || "0"),
 		updated_at: m.prop(item && item.updated_at || "0"),
-		is_enabled: m.prop(item && item.is_enabled || true),
 		is_removed: m.prop(item && item.is_removed || false),
 	}
 }
-
-// var NewItem = function(item){
-// 	return m.prop({
-// 		value_id: item && item.value_id || "",
-// 		value: item && item.value || "",
-// 		keys: item && item.keys || [],
-// 		props: item && item.props || {ts: 0},
-// 		flags: item && item.flags || [],
-// 		created_at: item && item.created_at || "0",
-// 		updated_at: item && item.updated_at || "0",
-// 		is_enabled: item && item.is_enabled || true,
-// 		is_removed: item && item.is_removed || false,
-// 	})
-// }
 
 var deleteItem = function(value_id) {
 	return m.request({url: getItemBuildURL(value_id, []), "method": "GET"})
@@ -75,10 +58,10 @@ var app = {
 
 	createItem: function(item, fields) {
 		item.value_id = "new:ts:"+_.now();
-		if (!item.hasOwnProperty("props")) {
-			item.props = {}	;
+		if (!item.hasOwnProperty("value")) {
+			item.value = {}	;
 		}
-		item.props["ts"] = _.now();
+		item.value["ts"] = _.now();
 		var newItem = this._addItem(item);
 
 		m.endComputation();
@@ -126,16 +109,13 @@ var app = {
 			value_id: _item.data.value_id(),
 			value: _item.data.value(),
 			keys: _item.data.keys(),
-			props: _item.data.props(),
-			flags: _item.data.flags(),
 			created_at: _item.data.created_at(),
 			updated_at: _item.data.updated_at(),
-			is_enabled: _item.data.is_enabled(),
 			is_removed: _item.data.is_removed(),
 		}
 
-		_itemData = _.assign({}, _itemData, item);
-		console.log(_itemData.flags)
+		_itemData = _.assignIn({}, _itemData, item);
+
 		_item.data = NewItem(_itemData)
 
 		_item.isPending(true);
@@ -177,7 +157,7 @@ var app = {
 			.filter(function(item){
 				return keysToString(item.keys) == keysToString(keys);
 			})
-			.orderBy(function(item){return item.data.props().ts}, "desc")
+			.orderBy(function(item){return item.data.value().ts}, "desc")
 			.value();
 	},
 
@@ -186,7 +166,7 @@ var app = {
 			.filter(function(item){
 				return _.intersection(ids, [item.value_id]).length == 1;
 			})
-			.orderBy(function(item){return item.data.props().ts}, "desc")
+			.orderBy(function(item){return item.data.value().ts}, "desc")
 			.value();
 	}
 }
@@ -205,7 +185,7 @@ var ItemList = {
 				},
 				view: function(c) {
 
-					return m(c.item_config.element, c.item_config.element_config, c.item.value());
+					return m(c.item_config.element, c.item_config.element_config, c.item.value().label);
 				}
 			}
 		};
@@ -230,10 +210,10 @@ var ItemList = {
 var ItemListCreater = {
 	controller: function(c) {
 		var api = {
-			newItem: NewItem({keys: c.keys}),
+			newItemLabel: m.prop(""),
 			onChangeValue: function() {
 				return function(value) {
-					this.newItem.value(value);
+					this.newItemLabel(value);
 					m.redraw.strategy("none");
 				}.bind(this);
 			},
@@ -242,13 +222,13 @@ var ItemListCreater = {
 					e.preventDefault();
 
 					var newItem = {
-						keys: this.newItem.keys(),
-						value: this.newItem.value(),
+						keys: c.keys,
+						value: {label: this.newItemLabel()},
 					}
 
-					this.newItem.value("");
+					this.newItemLabel("");
 
-					app.createItem(newItem, ["value", "props", "is_enabled"])
+					app.createItem(newItem, ["value"])
 						.then(function(res){}.bind(this)); 	
 
 					return false;
@@ -264,7 +244,7 @@ var ItemListCreater = {
 		var form = m("form.uk-form", {onsubmit: c.onCreateItem()}, [
 			m("input[type='text'].uk-width-1-1", {
 				placeholder: c.placeholder || "",
-				oninput: m.withAttr("value", c.onChangeValue()), value: c.newItem.value()
+				oninput: m.withAttr("value", c.onChangeValue()), value: c.newItemLabel()
 				}),
 			]);
 		return m("div", form);

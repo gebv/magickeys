@@ -7,7 +7,7 @@
 			"Type": "dto",
 			"Implements": ["DTO"],
 			"FactoryCustomCode": [
-				"model.Props = NewInterfaceMap()"
+				"model.Value = NewInterfaceMap()"
 			],
 			"Fields": [
 				{
@@ -31,19 +31,7 @@
 				},
 				{
 					"Name": "Value",
-					"Type": "string"	
-				},
-				{
-					"Name": "Props",
-					"Type": "InterfaceMap"
-				},
-				{
-					"Name": "Flags",
-					"Type": "StringArray"
-				},
-				{
-					"Name": "IsEnabled",
-					"Type": "bool"
+					"Type": "InterfaceMap"	
 				},
 				{
 					"Name": "IsRemoved",
@@ -56,7 +44,7 @@
 			"Type": "database",
 			"TableName": "values",
 			"FactoryCustomCode": [
-				"model.Props = NewInterfaceMap()"
+				"model.Value = NewInterfaceMap()"
 			],
 			"Fields": [
 				{
@@ -70,20 +58,9 @@
 				},
 				{
 					"Name": "Value",
-					"Type": "string"
-				},
-				{
-					"Name": "Props",
 					"Type": "InterfaceMap"
 				},
-				{
-					"Name": "Flags",
-					"Type": "[]string"
-				},
-				{
-					"Name": "IsEnabled",
-					"Type": "bool"
-				},
+
 				{
 					"Name": "IsRemoved",
 					"Type": "bool"
@@ -111,33 +88,20 @@
 						"Map": {
 							"ValueId":"ValueId",
 							"Keys":"Keys",
-							"Value":"Value",
-							"Flags":"Flags",
-							"IsEnabled":"IsEnabled",
+							"Value": "Value",
 							"IsRemoved":"IsRemoved",
 							"UpdatedAt":"UpdatedAt",
-							"CreatedAt":"CreatedAt",
-							"Props": "Props"
-						},
-						"Custom": [
-							"//model.Props = make(map[string]string, len(dto.Props))",
-							"//for key, _ := range dto.Props {",
-							"//model.Props[key] = dto.Props[key]",
-							"//}"
-						]
+							"CreatedAt":"CreatedAt"
+						}
 					},
 					{
 						"Name": "ValueDTO",
 						"Map": {
 							"Keys":"Keys.Array()",
 							"Value":"Value",
-							"Flags":"Flags.Array()",
-							"IsEnabled":"IsEnabled",
 							"IsRemoved":"IsRemoved"
 						},
 						"Custom": [
-							"//model.Props = map[string]string(dto.Props)",
-							"model.Props = dto.Props",
 							"model.ValueId = uuid.FromStringOrNil(dto.ValueId)"
 						]
 					}

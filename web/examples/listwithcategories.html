@@ -30,9 +30,8 @@
 			var api = {
 				onChange: function() {
 					return function(value) {
-						c.item.value(value)
+						c.item.value()["selected_category_id"] = value;
 						c.onChangeCategory(c.item.value_id(), value)
-						// console.log(c.related_item.value_id(), value);
 					}
 				}
 			};
@@ -46,13 +45,19 @@
 			var isPending = app.isPendingItem(c.item.value_id());
 
 			var categories = _.map(app.getItemsByKeys(c.factory_classifer_categoriy_keys), function(item) {
-				return m("option", {value: item.data.value_id()}, item.data.value());
+				var isSelected = c.item.value().selected_category_id == item.data.value_id()
+
+				var configSelected = isSelected?{selected: "selected"}:{};
+
+				var config = _.assign({}, {value: item.data.value_id()}, configSelected);
+
+				return m("option", config, item.data.value().label);
 			})
 
 			categories.unshift(m("option", {value: ""}, "--select--"));
 
-			var key =  c.item.value_id()+":"+c.item.props().ts;
-			var config = _.merge({}, c.item_config.element_config, {key: key, oninput: m.withAttr("value", c.onChange()), value: c.item.value()})
+			var key =  c.item.value_id()+":"+c.item.value().ts;
+			var config = _.merge({}, c.item_config.element_config, {key: key, oninput: m.withAttr("value", c.onChange()), title: c.item.value().ts})
 
 			return (isNew || isPending)? m("i.uk-icon-spin uk-icon-spinner"): m("select", config, categories);
 		}
@@ -66,7 +71,7 @@
 						e.preventDefault();
 
 						// Создали новую категорию для текущего элемента
-						app.createItem({value: "", keys: this.factory_categories_keys()}, ["value"])
+						app.createItem({value: {selected_category_id: ""}, keys: this.factory_categories_keys()}, ["value"])
 							.then(function(res){
 							})
 						return false;
@@ -119,8 +124,10 @@
 
 							onChangeCategory: function(item_category_id, selected_category_id) {
 								// для c.item.value_id() обновлена одна из категорий
+								// var newValue = _.assign({}, app.getItemsByIds([item_category_id])[0].data.value(), {selected_category_id: selected_category_id});
+								app.getItemsByIds([item_category_id])[0].data.value()["selected_category_id"] = selected_category_id
 
-								updateItem(item_category_id, {value: selected_category_id}, ["value"])
+								app.updateItem(item_category_id, {}, ["value"])
 									.then(function(){})
 							},
 
@@ -131,14 +138,14 @@
 				creatorCategory = m("a.uk-button uk-width-1-1", {onclick: c.onCreateCategoryForItem(c.item.value_id())}, "Add category");
 			}
 
-			var key =  c.item.value_id()+":"+c.item.props().ts;
+			var key =  c.item.value_id()+":"+c.item.value().ts;
 			var config = _.merge({}, c.item_config.element_config, {key: key})
 
 			var item = m("li", config, [
-				// m("pre", [c.item.value_id(), c.item.value(), JSON.stringify(c.item.props())].join("\n")),
+				// m("pre", [c.item.value_id(), c.item.value(), JSON.stringify(c.item.value())].join("\n")),
 				(isPending || isNew)? m("i.uk-margin-right uk-icon-spin uk-icon-spinner"): m("span"),
 
-				m("span", {className: className}, c.item.value()),
+				m("span", {className: className}, c.item.value().label),
 				m("p", "Categories"),
 				!isPending || isNew? 
 					[creatorCategory, groupSelectBoxesCategories]: 

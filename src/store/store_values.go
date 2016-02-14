@@ -87,7 +87,7 @@ func (s *ValueStore) FindByKeys(dto *models.ValueDTO, mode string) (res []models
 		res = append(res, *_model)
 
 		// TODO: reset for maps
-		model.Props = models.InterfaceMap{}
+		model.Value = models.InterfaceMap{}
 	}
 
 	return res, nil
@@ -107,7 +107,7 @@ func (s *ValueStore) Create(dto *models.ValueDTO) (models.Model, error) {
 
 	var err error 
 
-	query := fmt.Sprintf("INSERT INTO %s(keys, value_id, value, props, flags, is_enabled, is_removed, created_at, updated_at) VALUES(sort_text_array(?), ?, ?, ?, ?, ?, ?, ?, ?)", model.TableName())
+	query := fmt.Sprintf("INSERT INTO %s(keys, value_id, value, is_removed, created_at, updated_at) VALUES(sort_text_array(?), ?, ?, ?, ?, ?)", model.TableName())
 	where := fmt.Sprintf(" RETURNING %s", model.PrimaryName())
 
 	query = FormateToPQuery(query+where)
@@ -117,9 +117,6 @@ func (s *ValueStore) Create(dto *models.ValueDTO) (models.Model, error) {
 			model.Keys,
 			model.ValueId,
 			model.Value,
-			model.Props,
-			model.Flags,
-			model.IsEnabled,
 			model.IsRemoved,
 			model.CreatedAt,
 			model.UpdatedAt,
@@ -130,9 +127,6 @@ func (s *ValueStore) Create(dto *models.ValueDTO) (models.Model, error) {
 			model.Keys,
 			model.ValueId,
 			model.Value,
-			model.Props,
-			model.Flags,
-			model.IsEnabled,
 			model.IsRemoved,
 			model.CreatedAt,
 			model.UpdatedAt,

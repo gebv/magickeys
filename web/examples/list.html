@@ -34,14 +34,16 @@
 			var api = {
 				onChangeStatus: function(value_id) {
 					return function(done) {
-						app.updateItem(value_id, {props: {done: done?"yes": "no"}}, "props")
+						c.item.value()["done"] = done?"yes": "no"
+
+						app.updateItem(value_id, {}, "value")
 							.then(function(res) {
 								console.log(res);
 							})
 					}
 				},
 				isDone: function() {
-					return c.item.props().done && c.item.props().done == "yes"
+					return c.item.value().done && c.item.value().done == "yes"
 				}
 			};
 
@@ -54,7 +56,7 @@
 			var isPending = app.isPendingItem(c.item.value_id());
 
 			var className = isNew? "uk-text-muted": "";
-			var key =  c.item.value_id()+":"+c.item.props().ts;
+			var key =  c.item.value_id()+":"+c.item.value().ts;
 			var subItemKeys = _.concat(c.keys, c.item.value_id())
 
 			var checkbok = m("input[type='checkbox'].uk-margin-right", {
@@ -65,7 +67,7 @@
 				isPending? m("i.uk-margin-right uk-icon-spin uk-icon-spinner"): m("span"),
 
 				!isNew? checkbok: m("span"),
-				m("span", {className: className}, c.item.value()),
+				m("span", {className: className}, c.item.value().label),
 				!isNew? 
 					[
 						m.component(ItemListCreater, {keys: subItemKeys}),

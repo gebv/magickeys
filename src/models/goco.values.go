@@ -11,7 +11,7 @@ import (
 func NewValueDTO() *ValueDTO {
 	model := new(ValueDTO)
 	// Custom factory code
-	model.Props = NewInterfaceMap()
+	model.Value = NewInterfaceMap()
 	return model
 }
 
@@ -24,13 +24,7 @@ type ValueDTO struct {
 	// Keys
 	Keys StringArray `json:"keys" `
 	// Value
-	Value string `json:"value" `
-	// Props
-	Props InterfaceMap `json:"props" `
-	// Flags
-	Flags StringArray `json:"flags" `
-	// IsEnabled
-	IsEnabled bool `json:"is_enabled" `
+	Value InterfaceMap `json:"value" `
 	// IsRemoved
 	IsRemoved bool `json:"is_removed" `
 }
@@ -68,12 +62,6 @@ func (v *ValueDTO) Maps() map[string]interface{} {
 		"keys": &v.Keys,
 		// Value
 		"value": &v.Value,
-		// Props
-		"props": &v.Props,
-		// Flags
-		"flags": &v.Flags,
-		// IsEnabled
-		"is_enabled": &v.IsEnabled,
 		// IsRemoved
 		"is_removed": &v.IsRemoved,
 	}
@@ -93,7 +81,7 @@ func (v *ValueDTO) FromJson(data interface{}) error {
 func NewValue() *Value {
 	model := new(Value)
 	// Custom factory code
-	model.Props = NewInterfaceMap()
+	model.Value = NewInterfaceMap()
 	return model
 }
 
@@ -103,13 +91,7 @@ type Value struct {
 	// Keys
 	Keys []string `json:"keys" `
 	// Value
-	Value string `json:"value" `
-	// Props
-	Props InterfaceMap `json:"props" `
-	// Flags
-	Flags []string `json:"flags" `
-	// IsEnabled
-	IsEnabled bool `json:"is_enabled" `
+	Value InterfaceMap `json:"value" `
 	// IsRemoved
 	IsRemoved bool `json:"is_removed" `
 	// UpdatedAt
@@ -131,28 +113,17 @@ func (model *Value) TransformFrom(in interface{}) error {
 	switch in.(type) {
 	case *Value:
 		dto := in.(*Value)
-		model.Props = dto.Props
-		model.Value = dto.Value
-		model.Flags = dto.Flags
-		model.IsEnabled = dto.IsEnabled
-		model.IsRemoved = dto.IsRemoved
-		model.UpdatedAt = dto.UpdatedAt
 		model.ValueId = dto.ValueId
 		model.Keys = dto.Keys
+		model.Value = dto.Value
+		model.IsRemoved = dto.IsRemoved
+		model.UpdatedAt = dto.UpdatedAt
 		model.CreatedAt = dto.CreatedAt
-	//model.Props = make(map[string]string, len(dto.Props))
-	//for key, _ := range dto.Props {
-	//model.Props[key] = dto.Props[key]
-	//}
 	case *ValueDTO:
 		dto := in.(*ValueDTO)
 		model.Keys = dto.Keys.Array()
 		model.Value = dto.Value
-		model.Flags = dto.Flags.Array()
-		model.IsEnabled = dto.IsEnabled
 		model.IsRemoved = dto.IsRemoved
-		//model.Props = map[string]string(dto.Props)
-		model.Props = dto.Props
 		model.ValueId = uuid.FromStringOrNil(dto.ValueId)
 	default:
 		glog.Errorf("Not supported type %v", in)
@@ -174,12 +145,6 @@ func (v *Value) Maps() map[string]interface{} {
 		"keys": &v.Keys,
 		// Value
 		"value": &v.Value,
-		// Props
-		"props": &v.Props,
-		// Flags
-		"flags": &v.Flags,
-		// IsEnabled
-		"is_enabled": &v.IsEnabled,
 		// IsRemoved
 		"is_removed": &v.IsRemoved,
 		// UpdatedAt
