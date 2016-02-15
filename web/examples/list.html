@@ -10,14 +10,18 @@
 		</div>	
 	</div>
 	<div class="uk-grid">
-		<div class="uk-container-center uk-width-3-10">
-			<p>Items only of depth = 0</p>
-			<div id="w_list_view1"></div>
-		</div>	
-		<div class="uk-container-center uk-width-7-10">
-			<p>Tree of items</p>
-			<div id="w_list_view2"></div>
-		</div>	
+		<div class="uk-container-center uk-width-9-10">
+			<div class="uk-grid">
+				<div class="uk-container-center uk-width-3-10">
+					<p>Items only of depth = 0</p>
+					<div id="w_list_view1"></div>
+				</div>	
+				<div class="uk-container-center uk-width-7-10">
+					<p>Tree of items</p>
+					<div id="w_list_view2"></div>
+				</div>	
+			</div>
+		</div>
 	</div>
 
 </body>
@@ -25,7 +29,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js"></script>
 <script src="utils.js"></script>
 <script>
-	app.init(["examples", "simplelist"]);
+	app.init(["examples", "ex1"]);
 
 	// Custom view
 
@@ -78,7 +82,7 @@
 		}
 	}
 
-	m.mount(document.getElementById("w_list_creater"), m.component(ItemListCreater, {keys: ["examples", "simplelist"]}));
-	m.mount(document.getElementById("w_list_view1"), m.component(ItemList, {keys: ["examples", "simplelist"]}));
-	m.mount(document.getElementById("w_list_view2"), m.component(ItemList, {keys: ["examples", "simplelist"], item_view: Item_v1}));
+	m.mount(document.getElementById("w_list_creater"), m.component(ItemListCreater, {keys: ["examples", "ex1"]}));
+	m.mount(document.getElementById("w_list_view1"), m.component(ItemList, {keys: ["examples", "ex1"]}));
+	m.mount(document.getElementById("w_list_view2"), m.component(ItemList, {keys: ["examples", "ex1"], item_view: Item_v1}));
 </script>

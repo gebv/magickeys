@@ -3,24 +3,28 @@
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/uikit/2.24.3/css/uikit.almost-flat.css">
 <body>
 	<div class="uk-grid">
-		<p class="uk-h2 uk-width-1-1">Items with categories</p>
-		<div class="uk-container-center uk-width-4-10">
-			<p>Categories:</p>
-			<div id="w_category_creator"></div>
-			<div id="w_categories"></div>
-		</div>	
-		<div class="uk-container-center uk-width-6-10">
-			<p>Items with categories</p>
-			<div id="w_items_with_categories_creator"></div>
-			<div id="w_items_with_categories"></div>
-		</div>	
+		<div class="uk-container-center uk-width-9-10">
+			<p class="uk-h2 uk-width-1-1">Items with categories</p>
+			<div class="uk-grid">
+				<div class="uk-container-center uk-width-4-10">
+					<p>Categories:</p>
+					<div id="w_category_creator"></div>
+					<div id="w_categories"></div>
+				</div>	
+				<div class="uk-container-center uk-width-6-10">
+					<p>Items with categories</p>
+					<div id="w_items_with_categories_creator"></div>
+					<div id="w_items_with_categories"></div>
+				</div>	
+			</div>
+		</div>
 	</div>
 </body>
 <script src="//cdnjs.cloudflare.com/ajax/libs/mithril/0.2.1/mithril.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js"></script>
 <script src="utils.js"></script>
 <script>
-	var keys = ["examples", "listwithcategories"]
+	var keys = ["examples", "ex2"]
 
 	app.init(keys);
 

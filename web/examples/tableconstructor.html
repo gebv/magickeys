@@ -299,10 +299,10 @@
 		}
 	}
 
-	app.init(["examples", "tablecontructor"]).then(function(){
-		m.mount(document.getElementById("w_table"), m.component(Table, {keys: ["examples", "tablecontructor"]}));
-		m.mount(document.getElementById("w_group_items"), m.component(Categories, {keys: ["examples", "tablecontructor"]}));
-		m.mount(document.getElementById("w_factory_rows"), m.component(GroupSelect, {keys: ["examples", "tablecontructor", "categories"], role: ["rows"]}));
-		m.mount(document.getElementById("w_factory_cols"), m.component(GroupSelect, {keys: ["examples", "tablecontructor", "categories"], role: ["cols"]}));
+	app.init(["examples", "ex3"]).then(function(){
+		m.mount(document.getElementById("w_table"), m.component(Table, {keys: ["examples", "ex3"]}));
+		m.mount(document.getElementById("w_group_items"), m.component(Categories, {keys: ["examples", "ex3"]}));
+		m.mount(document.getElementById("w_factory_rows"), m.component(GroupSelect, {keys: ["examples", "ex3", "categories"], role: ["rows"]}));
+		m.mount(document.getElementById("w_factory_cols"), m.component(GroupSelect, {keys: ["examples", "ex3", "categories"], role: ["cols"]}));
 	});
 </script>
