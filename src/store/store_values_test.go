@@ -162,7 +162,7 @@ func TestCreateUniqValue(t *testing.T) {
 
 	_ , err = _s.Get("value").(*ValueStore).Create(dto)
 
-	if err == nil || !strings.HasPrefix(err.Error(), "ERROR: duplicate key value violates unique constraint \"values_keys_ifuniq_idx\""){
+	if err == nil || !strings.HasPrefix(err.Error(), "ERROR: duplicate key value violates unique constraint \"values_uniq_ifcontainuniqkey_idx\""){
 		t.Error(err)
 		return
 	}
