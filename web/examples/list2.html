@@ -56,6 +56,7 @@
 				if (item.isNew()) {
 					item._props().mode = "item_edit";
 				}
+				item.key = item.value_id
 
 				list.push(c.getComponent(item._props().mode, item))
 			})
@@ -91,7 +92,7 @@
 				m("hr"),
 				m("a.uk-button uk-button-small", {onclick: c.onToggleMode()}, "Редактировать"),
 				]);
-			return m("li", {key: c.value_id}, panel)
+			return m("li", {key: c.value_id, id: c.value_id}, panel)
 		}
 	}
 
@@ -178,7 +179,7 @@
 					])
 				
 				]);
-			return m("li", {key: c.value_id}, panel)
+			return m("li", {key: c.value_id, id: c.value_id}, panel)
 		}
 	}
 
