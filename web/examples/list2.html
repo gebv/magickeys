@@ -44,7 +44,7 @@
 			var list = [];
 
 			if (c.allowedAddedNewItem()) {
-				list.push(c.getComponent("item_creator"))
+				list.push(c.getComponent("item_creator", {key: keysToString(_.concat(c.keys, "button_create"))}))
 			}
 			
 			_.each(c.getByKeys(c.keys), function(item){
@@ -58,7 +58,14 @@
 				}
 				item.key = item.value_id
 
-				list.push(c.getComponent(item._props().mode, item))
+				var itemComponent = m("li", [
+					c.getComponent(item._props().mode, item),
+					!item.isNew()?
+						manager.getComponent("list", {keys: _.concat(c.keys, item.value_id)}):
+						m("span")
+					]);
+
+				list.push(itemComponent)
 			})
 
 			return m("ul.uk-list uk-list-space", list)
@@ -92,7 +99,7 @@
 				m("hr"),
 				m("a.uk-button uk-button-small", {onclick: c.onToggleMode()}, "Редактировать"),
 				]);
-			return m("li", {key: c.value_id, id: c.value_id}, panel)
+			return m("div", {key: c.value_id, id: c.value_id}, panel)
 		}
 	}
 
@@ -179,7 +186,7 @@
 					])
 				
 				]);
-			return m("li", {key: c.value_id, id: c.value_id}, panel)
+			return m("div", {key: c.value_id, id: c.value_id}, panel)
 		}
 	}
 
@@ -198,7 +205,7 @@
 			return api;
 		},
 		view: function(c) {
-			return m("a.uk-button uk-width-1-1", {onclick: c.onClick()}, "Новая")
+			return m("a.uk-button uk-width-1-1", {key: c.key, onclick: c.onClick()}, "Новая")
 		}
 	}
 
