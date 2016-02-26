@@ -1,0 +1,217 @@
+<meta charset="utf-8">
+<title>List items</title>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/uikit/2.24.3/css/uikit.almost-flat.css">
+<body>
+	<div class="uk-h2">List items</div>
+	<div class="uk-grid">
+		<div class="uk-container-center uk-width-9-10">
+			<div class="uk-grid">
+				<div class="uk-container-center uk-width-1-1">
+					<p>Items</p>
+					<div id="w_list_view1"></div>
+				</div>	
+			</div>
+		</div>
+	</div>
+
+</body>
+<script src="//cdnjs.cloudflare.com/ajax/libs/mithril/0.2.2-rc.1/mithril.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.5.1/lodash.min.js"></script>
+<script src="utils_v2.js"></script>
+<script>
+	var ListItems = {
+		controller: function(c) {
+			var api = {
+				getItems: function() {
+					return c.getByKeys(c.keys);
+				},
+				countItems: function() {
+					return this.getItems().length
+				},
+				allowedAddedNewItem: function() {
+					return this.size_limit == 0 || this.size_limit > this.countItems()
+				}
+			};
+			api = _.merge({}, api, c);
+			return api;
+		}, 
+		view: function(c) {
+
+			if (c.isLoading()) {
+				return m("div", m("i.uk-icon-spin uk-icon-spinner"))
+			}
+
+			var list = [];
+
+			if (c.allowedAddedNewItem()) {
+				list.push(c.getComponent("item_creator"))
+			}
+			
+			_.each(c.getByKeys(c.keys), function(item){
+
+				if (!item._props().mode) {
+					item._props().mode = "item";
+				}
+
+				if (item.isNew()) {
+					item._props().mode = "item_edit";
+				}
+
+				list.push(c.getComponent(item._props().mode, item))
+			})
+
+			return m("ul.uk-list uk-list-space", list)
+		}
+	}
+
+	var ItemList = {
+		controller: function(c) {
+			var api = {
+				onToggleMode: function() {
+					return function(e) {
+						e.preventDefault();
+						c._props().mode = "item_edit"
+						return false;
+					}
+				}
+			};
+
+			api = _.merge({}, api, c)
+
+			return api;
+		}, 
+		view: function(c) {
+			var flagNew = c.isNew() || !c.hasNotChanged()? m("i.uk-icon-save uk-text-warning"): m("span");
+			var flagLoading = c.isLoading()? m("i.uk-icon-spin uk-icon-spinner"): m("span");
+
+			var panel = m("div.uk-panel uk-panel-box",[
+				m("div.uk-panel-badge", [flagNew, flagLoading]),
+				m("h3.uk-panel-title", c.data.value().title || "..."),
+				m("p", c.data.value().description || "..."),
+				m("hr"),
+				m("a.uk-button uk-button-small", {onclick: c.onToggleMode()}, "Редактировать"),
+				]);
+			return m("li", {key: c.value_id}, panel)
+		}
+	}
+
+	var ItemListEdit = {
+		controller: function(c) {
+			var api = {
+				onToggleMode: function() {
+					return function(e) {
+						e.preventDefault();
+						console.log(c._value, c.data.value())
+						c.data.value(c._value);
+						c._props().mode = "item"
+						return false;
+					}
+				},
+				onChangeTitle: function() {
+					return function(value) {
+						c.data.value().title = value
+					}
+				},
+				onChangeDescription: function() {
+					return function(value) {
+						c.data.value().description = value
+					}
+				},
+				onSave: function() {
+					return function(e) {
+						e.preventDefault();
+
+						if (c.isNew()) {
+							c.create()
+								.then(function(res){
+									c._props().mode = "item";
+								})
+						} else {
+							c.update()
+								.then(function(res){
+									c._props().mode = "item";
+								})
+						}
+						
+
+						return false;
+					}
+				},
+				onRemove: function() {
+					return function(e) {
+						e.preventDefault();
+						c.delete({confirm_title: c.data.value().title});
+						return false;
+					}
+				}
+			};
+
+			api = _.merge({}, api, c)
+
+			return api;
+		}, 
+		view: function(c) {
+			var flagNew = c.isNew() || !c.hasNotChanged()? m("i.uk-icon-save uk-text-warning"): m("span");
+			var flagLoading = c.isLoading()? m("i.uk-icon-spin uk-icon-spinner"): m("span");
+
+			var panel = m("div.uk-panel uk-panel-box uk-form",[
+				m("div.uk-panel-badge", [flagNew, flagLoading]),
+				m("div.uk-form-row", [
+					m("label.uk-form-label", "Название"),
+					m("div.uk-form-controls",[
+						m("input[type='text'].uk-width-1-1", {oninput: m.withAttr("value", c.onChangeTitle()), value: c.data.value().title}),
+						])
+					]),
+				m("div.uk-form-row", [
+					m("label.uk-form-label", "Описание"),
+					m("div.uk-form-controls",[
+						m("textarea.uk-width-1-1", {oninput: m.withAttr("value", c.onChangeDescription())}, c.data.value().description),
+						])
+					]),
+				m("hr"),
+				m("div.uk-form-row", [
+					m("div.uk-form-controls",[
+						m("a.uk-button uk-button-primary", {onclick: c.onSave()}, "Сохранить"),
+						!c.isNew()? m("a.uk-button", {onclick: c.onToggleMode()}, "Отменить"): m("span"),
+						m("a.uk-button uk-float-right", {onclick: c.onRemove()}, "Удалить"),
+						])
+					])
+				
+				]);
+			return m("li", {key: c.value_id}, panel)
+		}
+	}
+
+	var CreateButton = {
+		controller: function(c) {
+			var api = {
+				onClick: function() {
+					return function(e) {
+						e.preventDefault();
+						c.new({value: {title: "", description: ""}, keys: c.keys})
+						return false;
+					}.bind(this)
+				}
+			};
+			api = _.merge({}, api, c);
+			return api;
+		},
+		view: function(c) {
+			return m("a.uk-button uk-width-1-1", {onclick: c.onClick()}, "Новая")
+		}
+	}
+
+	var manager = new Manager({
+		keys: ["examples", "ex4"], 
+		size_limit: 3,
+		button_new: "item_creator",
+		components: {
+			list: ListItems,
+			item: ItemList,
+			item_edit: ItemListEdit,
+			item_creator: CreateButton,
+		}
+	});
+	manager.loadByKeys();
+	m.mount(document.getElementById("w_list_view1"), manager.getComponent("list", {}));
+</script>
