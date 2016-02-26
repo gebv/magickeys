@@ -284,10 +284,8 @@
 	}
 
 	Item.prototype.hasNotChanged = function() {
-		var f1 = _.sortBy(_.values(this.data.value())).join("-");
-		var f2 = _.sortBy(_.values(this._value)).join("-");
-
-		console.log("hasNotChanged", f1, f2);
+		var f1 = _.sortBy(_.reduce(this.data.value(), function(res, v, i){res.push({v: v, i: i}); return res;}, []), "i").map(function(value){return value.v+":"+value.i}).join(",")
+		var f2 = _.sortBy(_.reduce(this._value, function(res, v, i){res.push({v: v, i: i}); return res;}, []), "i").map(function(value){return value.v+":"+value.i}).join(",")
 
 		return f1 == f2
 	}
