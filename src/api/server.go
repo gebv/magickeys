@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
+	// "github.com/gorilla/handlers"
 	"store"
 	"net/http"
 	"utils"
@@ -38,7 +39,7 @@ func StartServer() {
 		// 	time.Sleep(time.Second)
 		// 	panic("Error starting server " + err.Error())
 		// }
-
+		
 		http.ListenAndServe(utils.Cfg.ServiceSettings.ListenAddress, handler)
 	}()
 }

@@ -113,17 +113,17 @@ func (model *Value) TransformFrom(in interface{}) error {
 	switch in.(type) {
 	case *Value:
 		dto := in.(*Value)
+		model.CreatedAt = dto.CreatedAt
 		model.ValueId = dto.ValueId
 		model.Keys = dto.Keys
 		model.Value = dto.Value
 		model.IsRemoved = dto.IsRemoved
 		model.UpdatedAt = dto.UpdatedAt
-		model.CreatedAt = dto.CreatedAt
 	case *ValueDTO:
 		dto := in.(*ValueDTO)
+		model.IsRemoved = dto.IsRemoved
 		model.Keys = dto.Keys.Array()
 		model.Value = dto.Value
-		model.IsRemoved = dto.IsRemoved
 		model.ValueId = uuid.FromStringOrNil(dto.ValueId)
 	default:
 		glog.Errorf("Not supported type %v", in)

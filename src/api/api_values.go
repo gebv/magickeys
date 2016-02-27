@@ -10,27 +10,46 @@ import (
 	"utils"
 )
 
+func changeHeader(handler func (http.ResponseWriter, *http.Request)) func (http.ResponseWriter, *http.Request) {
+	return func (w http.ResponseWriter, r *http.Request) {
+		// glog.Infof("[%v] %v", r.Method, r.URL.String())	
+
+		time.Sleep(time.Millisecond * utils.Cfg.ServiceSettings.TimeoutRequest)
+
+		w.Header().Add("Content-Type", "application/json")
+
+		if origin := r.Header.Get("Origin"); origin != "" {
+		    w.Header().Set("Access-Control-Allow-Origin", origin)
+		    w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		    w.Header().Set("Access-Control-Allow-Headers",
+		      "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		  }
+
+		  // Stop here for a Preflighted OPTIONS request.
+		  if r.Method == "OPTIONS" {
+		    return
+		  }
+
+		handler(w, r)
+	}
+}
 
 func InitValues(r *mux.Router) {
-	sr := r.PathPrefix("/values").Subrouter()
+	sr := r.PathPrefix("/values").Subrouter()	
 
-	sr.HandleFunc("/", NewValueHandler).Methods("POST")
-	sr.HandleFunc("/{value_id}", GetValueHandler).Methods("GET")
-	sr.HandleFunc("/{value_id}", UpdateValueHandler).Methods("PUT")
-	sr.HandleFunc("/{value_id}", DeleteValueHandler).Methods("DELETE")
+	sr.HandleFunc("/", changeHeader(NewValueHandler)).Methods("POST", "OPTIONS")
+	sr.HandleFunc("/{value_id}", changeHeader(GetValueHandler)).Methods("GET")
+	sr.HandleFunc("/{value_id}", changeHeader(UpdateValueHandler)).Methods("PUT", "OPTIONS")
+	sr.HandleFunc("/{value_id}", changeHeader(DeleteValueHandler)).Methods("DELETE", "OPTIONS")
 
-	sr.HandleFunc("/search/eq/{keys}", BuildSearchByMode("=")).Methods("GET")
-	sr.HandleFunc("/search/contains/{keys}", BuildSearchByMode("@>")).Methods("GET")
-	sr.HandleFunc("/search/any/{keys}", BuildSearchByMode("&&")).Methods("GET")
+	sr.HandleFunc("/search/eq/{keys}", changeHeader(BuildSearchByMode("="))).Methods("GET")
+	sr.HandleFunc("/search/contains/{keys}", changeHeader(BuildSearchByMode("@>"))).Methods("GET")
+	sr.HandleFunc("/search/any/{keys}", changeHeader(BuildSearchByMode("&&"))).Methods("GET")
 }
 
 func BuildSearchByMode(mode string) func(http.ResponseWriter, *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		time.Sleep(time.Millisecond * utils.Cfg.ServiceSettings.TimeoutRequest)
-
-		w.Header().Set("Content-Type", "application/json")
-
 		dto := models.NewValueDTO()
 		res := models.NewResponse()
 		dto.Keys.AddAsArray(strings.Split(mux.Vars(r)["keys"], ","))
@@ -52,9 +71,6 @@ func BuildSearchByMode(mode string) func(http.ResponseWriter, *http.Request) {
 } 
 
 func NewValueHandler(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(time.Millisecond * utils.Cfg.ServiceSettings.TimeoutRequest)
-	w.Header().Set("Content-Type", "application/json")
-	
 	dto := models.NewValueDTO()
 	res := models.NewResponse()
 
@@ -80,9 +96,6 @@ func NewValueHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetValueHandler(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(time.Millisecond * utils.Cfg.ServiceSettings.TimeoutRequest)
-	w.Header().Set("Content-Type", "application/json")
-	
 	dto := models.NewValueDTO()
 	dto.ValueId = mux.Vars(r)["value_id"]
 	res := models.NewResponse()
@@ -103,9 +116,6 @@ func GetValueHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateValueHandler(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(time.Millisecond * utils.Cfg.ServiceSettings.TimeoutRequest)
-	w.Header().Set("Content-Type", "application/json")
-	
 	dto := models.NewValueDTO()
 	dto.ValueId = mux.Vars(r)["value_id"]
 	dto.UpdateFields = strings.Split(r.URL.Query().Get("fields"), ",")
@@ -134,8 +144,6 @@ func UpdateValueHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteValueHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	
 	dto := models.NewValueDTO()
 	dto.ValueId = mux.Vars(r)["value_id"]
 	res := models.NewResponse()

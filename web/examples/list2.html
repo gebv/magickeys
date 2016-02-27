@@ -179,7 +179,7 @@
 				m("hr"),
 				m("div.uk-form-row", [
 					m("div.uk-form-controls",[
-						m("a.uk-button uk-button-primary", {onclick: c.onSave()}, "Сохранить"),
+						m("a", {className: c.hasNotChanged()? "uk-button": "uk-button uk-button-primary", onclick: c.onSave()}, "Сохранить"),
 						!c.isNew()? m("a.uk-button", {onclick: c.onToggleMode()}, "Отменить"): m("span"),
 						m("a.uk-button uk-float-right", {onclick: c.onRemove()}, "Удалить"),
 						])
